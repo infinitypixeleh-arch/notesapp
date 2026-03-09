@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InfNotes</title>
+    <title>InfNotes // Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -27,194 +27,146 @@
         #rich-editor { flex: 1; padding: 20px 80px; font-size: 1rem; line-height: 1.8; color: #c0c0c0; outline: none; overflow-y: auto; }
         #note-title { font-size: 2.2rem; background: transparent; border: none; color: var(--text-focus); padding: 60px 80px 10px 80px; font-weight: 600; width: 100%; }
 
-       /* Update your .msg-bubble class to handle dynamic borders */
-    .msg-bubble { 
-    background: #111; 
-    padding: 12px 18px; 
-    border-radius: 8px; 
-    max-width: 70%; 
-    border: 1px solid #151515; /* Default border */
-    color: #ccc; 
-    margin-bottom: 10px; 
-    }
-    .msg-bubble.own { align-self: flex-end; }
-        .tag-badge { font-size: 0.55rem; padding: 2px 6px; border-radius: 4px; background: #222; color: #fff; margin-left: 5px; border: 1px solid #333; }
-
-        .xp-bar-container { width: 100%; height: 3px; background: #111; margin-top: 8px; border-radius: 2px; overflow: hidden; }
-        #xp-fill { height: 100%; background: var(--xp); width: 0%; transition: width 0.4s ease; }
+        /* CHAT COLORS & BUBBLES */
+        .msg-bubble { background: #111; padding: 12px 18px; border-radius: 8px; max-width: 70%; border: 1px solid #151515; color: #ccc; margin-bottom: 10px; position: relative; }
+        .msg-bubble.own { align-self: flex-end; }
         
-        .card-container { perspective: 1000px; width: 450px; height: 280px; margin: 30px auto; cursor: pointer; }
-        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
-        .card-inner.flipped { transform: rotateY(180deg); }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 40px; border: 1px solid var(--border); border-radius: 12px; background: #0a0a0a; color: white; font-size: 1.2rem; }
-        .card-back { transform: rotateY(180deg); background: #111; color: var(--accent); }
-
-        .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; margin-bottom: 40px;}
-        /* Tooltip styling for the preview */
-        .store-card { position: relative; }
-
+        /* MARKET PREVIEW & GRID */
+        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .store-card { background: #0a0a0a; border: 1px solid #151515; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; position: relative; transition: 0.2s; }
+        .store-card:hover { border-color: #333; background: #0f0f0f; }
+        
         .preview-tooltip { 
-        visibility: hidden; 
-        position: absolute; 
-        bottom: 110%; 
-        left: 0; 
-        width: 220px; 
-        background: #151515; 
-        border: 1px solid #333; 
-        padding: 12px; 
-        border-radius: 8px; 
-        font-size: 0.7rem; 
-        color: #888; 
-        text-align: left; 
-        z-index: 100; 
-        pointer-events: none;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            visibility: hidden; position: absolute; bottom: 115%; left: 0; width: 220px; 
+            background: #111; border: 1px solid #333; padding: 12px; border-radius: 8px; 
+            font-size: 0.7rem; color: #888; text-align: left; z-index: 100; pointer-events: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
+        .store-card:hover .preview-tooltip { visibility: visible; }
 
-.store-card:hover .preview-tooltip { visibility: visible; }
+        /* XP BAR */
+        .xp-bar-container { width: 100%; height: 3px; background: #111; margin-top: 8px; border-radius: 2px; overflow: hidden; }
+        #xp-fill { height: 100%; background: var(--xp); width: 0%; transition: 0.4s; }
         
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
-        .modal-content { background: #0d0d0d; border: 1px solid #222; padding: 30px; border-radius: 10px; width: 380px; }
-        .nice-input { width: 100%; background: #151515; border: 1px solid #222; color: #fff; padding: 12px; margin-bottom: 15px; border-radius: 5px; outline: none; }
-        
-        .card-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
-        .btn-sm { padding: 5px 10px; font-size: 0.6rem; cursor: pointer; background: transparent; border: 1px solid #333; color: #555; }
-    
+        /* FLASHCARDS */
+        .card-container { perspective: 1000px; width: 450px; height: 280px; margin: 30px auto; cursor: pointer; }
+        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+        .card-inner.flipped { transform: rotateY(180deg); }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 40px; border: 1px solid var(--border); border-radius: 12px; background: #0a0a0a; color: white; text-align: center; }
+        .card-back { transform: rotateY(180deg); background: #111; color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <div id="card-modal" class="modal">
-        <div class="modal-content">
-            <h4 id="modal-title" style="margin: 0 0 20px 0; color: white;">FLASHCARD</h4>
-            <input type="text" id="q-in" class="nice-input" placeholder="Question">
-            <input type="text" id="a-in" class="nice-input" placeholder="Answer">
-            <div style="display:flex; gap:10px;">
-                <button onclick="saveNewCard()" style="flex:2; padding:12px; background:white; color:black; border:0; font-weight:600;">SAVE</button>
-                <button onclick="closeModal()" style="flex:1; padding:12px; background:#222; color:white; border:0;">CANCEL</button>
-            </div>
-        </div>
-    </div>
-
     <div id="auth-overlay" style="position:fixed; inset:0; background:var(--bg); z-index:5000; display:flex; align-items:center; justify-content:center;">
         <div style="width:300px; text-align:center;">
             <h1 style="letter-spacing:5px; color:white;">INFNOTES</h1>
-            <input type="email" id="email" placeholder="Email" class="nice-input">
-            <input type="password" id="pass" placeholder="Password" class="nice-input">
-            <button id="login-btn" style="width:100%; padding:12px; background:white; border:none; font-weight:600;">ENTER</button>
+            <input type="email" id="email" placeholder="Email" style="width:100%; background:#151515; border:1px solid #222; color:white; padding:12px; margin-bottom:10px;">
+            <input type="password" id="pass" placeholder="Password" style="width:100%; background:#151515; border:1px solid #222; color:white; padding:12px; margin-bottom:20px;">
+            <button id="login-btn" style="width:100%; padding:12px; background:white; font-weight:600; border:none; cursor:pointer;">ENTER</button>
         </div>
     </div>
 
     <aside>
         <div style="margin-bottom:30px;">
             <div style="display:flex; justify-content:space-between; font-size:0.6rem;">
-                <span id="my-lvl-text">LVL 1</span>
-                <span id="my-stars" style="color:var(--star)"></span>
+                <span id="lvl-text">LVL 1</span>
+                <span id="stars-text" style="color:var(--star)"></span>
             </div>
             <div class="xp-bar-container"><div id="xp-fill"></div></div>
-            <div id="my-creds" style="color:var(--credits); font-size:0.6rem; margin-top:5px;">$0</div>
+            <div id="creds-text" style="color:var(--credits); font-size:0.6rem; margin-top:5px;">$0</div>
         </div>
         <div class="nav-item active" onclick="showView('notes-view', this)">Notes</div>
         <div class="nav-item" onclick="showView('cards-view', this)">Flashcards</div>
+        <div class="nav-item" onclick="showView('store-view', this)">Market</div>
         <div class="nav-item" onclick="showView('messages-view', this)">Chat</div>
         <div class="nav-item" onclick="renderLeaderboard(this)">Leaderboard</div>
-        <div class="nav-item" onclick="showView('store-view', this)">Market</div>
         <div class="nav-item" onclick="showView('profile-view', this)">Profile</div>
         
         <div class="nav-label">Files</div>
         <div id="folder-root"></div>
-        <button onclick="createNewNote()" style="margin-top:20px; background:0; color:#444; border:1px solid #151515; padding:10px; font-size:0.7rem;">+ NEW NOTE</button>
-        
-        <div class="nav-label">Squad</div>
-        <div id="user-root"></div>
+        <button onclick="createNewNote()" style="margin-top:20px; background:0; color:#444; border:1px solid #151515; padding:10px; cursor:pointer; font-size:0.7rem;">+ NEW NOTE</button>
     </aside>
 
     <div class="view-container">
         <div id="notes-view" class="view active">
             <div style="position:absolute; top:30px; right:60px; display:flex; gap:15px;">
-                <button onclick="listNoteOnMarket()" style="color:var(--credits); background:0; border:0; font-size:0.7rem;">LIST ON MARKET</button>
-                <button onclick="shareNote()" style="color:var(--accent); background:0; border:0; font-size:0.7rem;">SHARE</button>
-                <button onclick="deleteNote()" style="color:#633; background:0; border:0; font-size:0.7rem;">DELETE</button>
+                <button onclick="listNote()" style="color:var(--credits); background:0; border:0; cursor:pointer; font-size:0.7rem;">LIST ON MARKET</button>
+                <button onclick="shareNote()" style="color:var(--accent); background:0; border:0; cursor:pointer; font-size:0.7rem;">SHARE</button>
             </div>
             <input type="text" id="note-title" placeholder="Untitled">
             <div id="rich-editor" contenteditable="true"></div>
         </div>
 
-        <div id="cards-view" class="view" style="padding:100px;">
-            <div id="deck-list-container">
-                <div style="display:flex; justify-content:space-between; margin-bottom: 40px;">
-                    <h3 style="color:white; font-weight:400;">DECKS</h3>
-                    <button onclick="createNewDeck()" style="background:0; border:1px solid var(--border); color:var(--text); padding:8px 15px;">+ NEW DECK</button>
-                </div>
-                <div id="deck-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:20px;"></div>
-            </div>
-            <div id="study-area" style="display:none;">
-                <button onclick="exitDeck()" style="background:0; border:0; color:#555; margin-bottom:20px;">< BACK</button>
+        <div id="store-view" class="view" style="padding:80px;">
+            <h3 style="color:white; margin-bottom:40px;">MARKETPLACE</h3>
+            <div class="nav-label">COMMUNITY NOTES</div>
+            <div id="market-notes-grid" class="market-grid"></div>
+            <div class="nav-label" style="margin-top:40px;">FLASHCARD DECKS</div>
+            <div id="market-cards-grid" class="market-grid"></div>
+        </div>
+
+        <div id="cards-view" class="view" style="padding:80px;">
+            <div id="deck-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:20px;"></div>
+            <div id="study-ui" style="display:none; text-align:center;">
+                <button onclick="exitDeck()" style="background:0; border:0; color:#555; margin-bottom:20px; cursor:pointer;">< BACK</button>
                 <div class="card-container" onclick="this.querySelector('.card-inner').classList.toggle('flipped')">
                     <div class="card-inner"><div class="card-front" id="card-q"></div><div class="card-back" id="card-a"></div></div>
                 </div>
-                <div style="display:flex; gap:10px; justify-content:center;">
-                    <button onclick="deferCard()" style="background:#111; color:var(--xp); border:1px solid #222; padding:12px 25px;">LATER</button>
-                    <button onclick="nextCard(true)" style="background:var(--accent); color:black; border:none; padding:12px 25px; font-weight:600;">MASTERED</button>
+                <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                    <button onclick="deferCard()" style="background:#111; color:var(--xp); border:1px solid #333; padding:12px 25px; cursor:pointer;">LATER</button>
+                    <button onclick="nextCard(true)" style="background:var(--accent); color:black; border:none; padding:12px 25px; font-weight:600; cursor:pointer;">MASTERED</button>
                 </div>
             </div>
         </div>
 
-        <div id="store-view" class="view" style="padding:100px;">
-            <h3 style="color:white;">MARKET</h3>
-            <div id="store-balance" style="color:var(--credits); margin-bottom:30px;">$0</div>
-            
-            <div class="nav-label">PUBLISHED NOTES</div>
-            <div id="market-notes-grid" class="store-grid"></div>
-
-            <div class="nav-label">NAME TAGS</div>
-            <div id="tag-grid" class="store-grid"></div>
+        <div id="messages-view" class="view">
+            <div id="chat-history" style="flex:1; overflow-y:auto; padding:40px; display:flex; flex-direction:column;"></div>
+            <div style="padding:30px; border-top:1px solid #151515; display:flex; gap:15px;">
+                <input type="text" id="chat-in" style="flex:1; background:0; border:0; color:white;" placeholder="Message...">
+                <button id="chat-send" style="color:var(--accent); background:0; border:0; font-weight:600; cursor:pointer;">SEND</button>
+            </div>
         </div>
 
-        <div id="profile-view" class="view" style="padding:100px; align-items: center;">
-            <div id="p-words" style="font-size:3.5rem; color:white;">0</div>
-            <div id="p-lvl" style="color:var(--xp); margin-bottom: 20px;">LEVEL 1</div>
-            <button id="prestige-btn" onclick="doPrestige()" style="display:none; padding:15px 40px; background:var(--star); color:black; font-weight:800; border:0;">ASCEND TO PRESTIGE</button>
+        <div id="profile-view" class="view" style="padding:80px; align-items:center;">
+            <h1 id="p-xp" style="font-size:4rem; color:white; margin:0;">0</h1>
+            <p id="p-lvl">LEVEL 1</p>
+            <button id="prestige-btn" onclick="doPrestige()" style="display:none; padding:15px 40px; background:var(--star); color:black; font-weight:800; border:0; cursor:pointer;">ASCEND</button>
             <div id="p-stars" style="font-size:1.5rem; color:var(--star); margin-top:20px;"></div>
         </div>
 
-        <div id="leaderboard-view" class="view" style="padding:100px;"><div id="leaderboard-list"></div></div>
-        <div id="messages-view" class="view">
-            <div id="chat-history"></div>
-            <div style="padding:30px; border-top:1px solid var(--border); display:flex; gap:20px;">
-                <input type="text" id="chat-in" style="flex:1; background:0; border:0; color:white;" placeholder="Message...">
-                <button id="chat-send" style="color:var(--accent); background:0; border:0;">SEND</button>
-            </div>
-        </div>
+        <div id="leaderboard-view" class="view" style="padding:80px;"><div id="leader-list"></div></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, where, addDoc, updateDoc, deleteDoc, getDocs, orderBy, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getDatabase, ref, push, onChildAdded, onValue, set, onDisconnect } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { getFirestore, doc, onSnapshot, collection, query, where, addDoc, updateDoc, getDocs, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI", authDomain: "infnotes.firebaseapp.com", projectId: "infnotes", databaseURL: "https://infnotes-default-rtdb.asia-southeast1.firebasedatabase.app/", appId: "1:976520833702:web:ce8aa0afc1a6131da7e267" };
         const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), rtd = getDatabase(app);
 
         let currentUser, currentNoteId, myData = {}, allNotes = [], allCards = [], activeDeck = [], curIdx = 0;
 
+        // --- COLOR UTILITY ---
+        const getIDColor = (id) => {
+            let hash = 0;
+            for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+            let color = '#';
+            for (let i = 0; i < 3; i++) {
+                let value = (hash >> (i * 8)) & 0xFF;
+                color += ('00' + (Math.floor(value * 0.7) + 80).toString(16)).substr(-2);
+            }
+            return color;
+        };
+
         onAuthStateChanged(auth, u => { if(u) { currentUser = u; document.getElementById('auth-overlay').style.display='none'; init(); } });
         document.getElementById('login-btn').onclick = () => {
             const e = document.getElementById('email').value, p = document.getElementById('pass').value;
             signInWithEmailAndPassword(auth,e,p).catch(()=>createUserWithEmailAndPassword(auth,e,p));
         };
-const getIDColor = (id) => {
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-    let color = '#';
-    for (let i = 0; i < 3; i++) {
-        // Math keeps the colors bright enough for dark mode
-        let value = (hash >> (i * 8)) & 0xFF;
-        color += ('00' + (Math.floor(value * 0.7) + 80).toString(16)).substr(-2);
-    }
-    return color;
-};
+
         function calculateLvl(xp) {
             let lvl = 1, req = 100;
             while(xp >= req) { xp -= req; req *= 1.1; lvl++; }
@@ -223,8 +175,16 @@ const getIDColor = (id) => {
 
         async function init() {
             onSnapshot(doc(db, "users", currentUser.uid), snap => {
-                myData = snap.data() || { wordCount: 0, prestige: 0, credits: 0, tags: [] };
-                updateUI();
+                myData = snap.data() || { wordCount: 0, prestige: 0, credits: 0 };
+                const { lvl, progress } = calculateLvl(myData.wordCount);
+                document.getElementById('lvl-text').innerText = `LVL ${lvl}`;
+                document.getElementById('xp-fill').style.width = progress + "%";
+                document.getElementById('stars-text').innerText = "★".repeat(myData.prestige);
+                document.getElementById('creds-text').innerText = `$${myData.credits || 0}`;
+                document.getElementById('p-xp').innerText = Math.floor(myData.wordCount);
+                document.getElementById('p-lvl').innerText = `LEVEL ${lvl}`;
+                document.getElementById('p-stars').innerText = "★".repeat(myData.prestige);
+                document.getElementById('prestige-btn').style.display = lvl >= 50 ? 'block' : 'none';
             });
 
             onSnapshot(query(collection(db, "notes"), where("access", "array-contains", currentUser.uid)), s => {
@@ -235,43 +195,22 @@ const getIDColor = (id) => {
                 allCards = s.docs.map(d => ({id:d.id, ...d.data()})); renderDecks();
             });
 
-            onSnapshot(collection(db, "market"), s => renderMarketNotes(s.docs.map(d => ({id:d.id, ...d.data()}))));
+            onSnapshot(collection(db, "market_notes"), s => renderMarketNotes(s.docs.map(d => ({id:d.id, ...d.data()}))));
+            onSnapshot(collection(db, "market_cards"), s => renderMarketCards(s.docs.map(d => ({id:d.id, ...d.data()}))));
 
-           onChildAdded(ref(rtd, 'messages'), s => {
-    const m = s.val();
-    const userColor = getIDColor(m.uid);
-    const d = document.createElement('div');
-    
-    d.className = `msg-bubble ${m.uid === currentUser.uid ? 'own' : ''}`;
-    d.style.borderColor = userColor; // Adds the colored border
-    
-    d.innerHTML = `
-        <div style="font-size:0.6rem; color:${userColor}; margin-bottom:4px; font-weight:600;">
-            ${m.sender} ${"★".repeat(m.pres||0)}
-        </div>
-        <div>${m.text}</div>
-    `;
-    document.getElementById('chat-history').appendChild(d);
-    document.getElementById('chat-history').scrollTop = 9999;
-});
-
-            renderStaticMarket();
+            onChildAdded(ref(rtd, 'messages'), s => {
+                const m = s.val();
+                const uColor = getIDColor(m.uid);
+                const d = document.createElement('div');
+                d.className = `msg-bubble ${m.uid === currentUser.uid ? 'own' : ''}`;
+                d.style.borderColor = uColor;
+                d.innerHTML = `<div style="font-size:0.6rem; color:${uColor}; font-weight:600;">${m.sender} ${"★".repeat(m.pres||0)}</div><div>${m.text}</div>`;
+                document.getElementById('chat-history').appendChild(d);
+                document.getElementById('chat-history').scrollTop = 9999;
+            });
         }
 
-        function updateUI() {
-            const { lvl, progress } = calculateLvl(myData.wordCount);
-            document.getElementById('my-lvl-text').innerText = `LVL ${lvl}`;
-            document.getElementById('xp-fill').style.width = progress + "%";
-            document.getElementById('my-stars').innerText = "★".repeat(myData.prestige);
-            document.getElementById('my-creds').innerText = `$${myData.credits || 0}`;
-            document.getElementById('store-balance').innerText = `BALANCE: $${myData.credits || 0}`;
-            document.getElementById('p-words').innerText = Math.floor(myData.wordCount);
-            document.getElementById('p-lvl').innerText = `LEVEL ${lvl}`;
-            document.getElementById('p-stars').innerText = "★".repeat(myData.prestige);
-            document.getElementById('prestige-btn').style.display = lvl >= 50 ? 'block' : 'none';
-        }
-
-        /* --- NOTES & MARKET LISTING --- */
+        /* --- NOTES & MARKET --- */
         window.renderSidebar = () => {
             const root = document.getElementById('folder-root'); root.innerHTML = '';
             allNotes.forEach(n => {
@@ -281,73 +220,69 @@ const getIDColor = (id) => {
             });
         };
 
-        // Function to list a note with a text snippet
-window.listNoteOnMarket = async () => {
-    const price = prompt("SET PRICE FOR THIS NOTE?");
-    const note = allNotes.find(n => n.id === currentNoteId);
-    if(note && price) {
-        // Strip HTML tags for the preview snippet
-        const plainText = note.content.replace(/<[^>]*>?/gm, '');
-        const snippet = plainText.substring(0, 120) + "...";
-        
-        await addDoc(collection(db, "market"), { 
-            noteId: currentNoteId, 
-            title: note.title, 
-            price: parseInt(price), 
-            preview: snippet,
-            seller: user.uid 
-        });
-        alert("Listed with preview!");
-    }
-};
-
-// Function to render the marketplace with tooltips
-function renderMarketNotes(items) {
-    const grid = document.getElementById('market-notes-grid');
-    grid.innerHTML = '';
-    items.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'store-card';
-        card.innerHTML = `
-            <div class="preview-tooltip">
-                <b style="color:#eee">PREVIEW:</b><br>${item.preview}
-            </div>
-            <div>${item.title}</div>
-            <div style="color:var(--credits); font-size:0.7rem; margin-top:5px;">$${item.price}</div>
-        `;
-        card.onclick = () => buyNote(item);
-        grid.appendChild(card);
-    });
-}
+        window.listNote = async () => {
+            const price = prompt("CREDIT PRICE?");
+            const note = allNotes.find(n => n.id === currentNoteId);
+            if(note && price) {
+                const plainText = note.content.replace(/<[^>]*>?/gm, '').substring(0, 120) + "...";
+                await addDoc(collection(db, "market_notes"), { noteId: currentNoteId, title: note.title, price: parseInt(price), preview: plainText, seller: currentUser.uid });
+                alert("Note listed!");
+            }
+        };
 
         function renderMarketNotes(items) {
             const grid = document.getElementById('market-notes-grid'); grid.innerHTML = '';
             items.forEach(item => {
                 const card = document.createElement('div'); card.className = 'store-card';
-                card.innerHTML = `<div>${item.title}</div><div style="color:var(--credits)">$${item.price}</div>`;
-                card.onclick = () => buyNote(item);
+                card.innerHTML = `<div class="preview-tooltip"><b style="color:var(--accent)">PREVIEW:</b><br>${item.preview}</div><div>${item.title}</div><div style="color:var(--credits); font-size:0.7rem;">$${item.price}</div>`;
+                card.onclick = async () => {
+                    if(myData.credits >= item.price) {
+                        await updateDoc(doc(db, "notes", item.noteId), { access: arrayUnion(currentUser.uid) });
+                        await updateDoc(doc(db, "users", currentUser.uid), { credits: myData.credits - item.price });
+                        alert("Note Purchased!");
+                    }
+                };
                 grid.appendChild(card);
             });
         }
 
-        async function buyNote(item) {
-            if(myData.credits >= item.price) {
-                await updateDoc(doc(db, "notes", item.noteId), { access: arrayUnion(currentUser.uid) });
-                await updateDoc(doc(db, "users", currentUser.uid), { credits: myData.credits - item.price });
-                alert("Note Added to your files!");
-            } else alert("Insufficient Credits");
+        function renderMarketCards(items) {
+            const grid = document.getElementById('market-cards-grid'); grid.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div'); card.className = 'store-card';
+                card.innerHTML = `<div>${item.title}</div><div style="font-size:0.6rem; color:#444;">${item.cardCount} CARDS</div><div style="color:var(--credits); font-size:0.7rem;">$${item.price}</div>`;
+                card.onclick = async () => {
+                    if(myData.credits >= item.price) {
+                        for(const c of item.cards) { await addDoc(collection(db, "cards"), { q: c.q, a: c.a, deck: item.title, owner: currentUser.uid }); }
+                        await updateDoc(doc(db, "users", currentUser.uid), { credits: myData.credits - item.price });
+                        alert("Deck Added!");
+                    }
+                };
+                grid.appendChild(card);
+            });
         }
 
         /* --- FLASHCARDS --- */
         window.renderDecks = () => {
             const grid = document.getElementById('deck-grid'); grid.innerHTML = '';
-            [...new Set(allCards.map(c => c.deck))].forEach(name => {
-                const d = document.createElement('div'); d.className = 'store-card'; d.innerText = name;
-                d.onclick = () => { activeDeck = allCards.filter(c => c.deck === name); curIdx = 0; 
-                    document.getElementById('deck-list-container').style.display='none'; document.getElementById('study-area').style.display='block'; showCard(); };
+            const names = [...new Set(allCards.map(c => c.deck))];
+            names.forEach(name => {
+                const d = document.createElement('div'); d.className = 'store-card';
+                d.innerHTML = `<div>${name}</div><button onclick="event.stopPropagation(); listDeck('${name}')" style="font-size:0.5rem; background:0; border:1px solid #222; color:#555; margin-top:10px;">SELL DECK</button>`;
+                d.onclick = () => { activeDeck = allCards.filter(c => c.deck === name); curIdx = 0; document.getElementById('deck-grid').style.display='none'; document.getElementById('study-ui').style.display='block'; showCard(); };
                 grid.appendChild(d);
             });
         };
+        
+        window.listDeck = async (deckName) => {
+            const price = prompt("PRICE FOR DECK?");
+            if(price) {
+                const deckCards = allCards.filter(c => c.deck === deckName);
+                await addDoc(collection(db, "market_cards"), { title: deckName, price: parseInt(price), cardCount: deckCards.length, cards: deckCards, seller: currentUser.uid });
+                alert("Deck listed!");
+            }
+        };
+
         function showCard() {
             if(!activeDeck[curIdx]) { exitDeck(); return; }
             document.getElementById('card-q').innerText = activeDeck[curIdx].q;
@@ -355,28 +290,17 @@ function renderMarketNotes(items) {
             document.querySelector('.card-inner').classList.remove('flipped');
         }
         window.deferCard = () => { activeDeck.push(activeDeck.splice(curIdx, 1)[0]); showCard(); };
-        window.nextCard = async (m) => { 
-            if(m) await updateDoc(doc(db, "users", currentUser.uid), { wordCount: myData.wordCount + 5, credits: (myData.credits||0) + 2 });
-            curIdx++; showCard(); 
-        };
-        window.exitDeck = () => { document.getElementById('deck-list-container').style.display='block'; document.getElementById('study-area').style.display='none'; };
+        window.nextCard = async (m) => { if(m) await updateDoc(doc(db, "users", currentUser.uid), { wordCount: myData.wordCount + 5, credits: (myData.credits||0) + 2 }); curIdx++; showCard(); };
+        window.exitDeck = () => { document.getElementById('deck-grid').style.display='grid'; document.getElementById('study-ui').style.display='none'; };
 
-        /* --- CORE FEATURES --- */
+        /* --- CORE --- */
         window.doPrestige = async () => { if(confirm("RESET XP FOR A STAR?")) await updateDoc(doc(db, "users", currentUser.uid), { wordCount: 0, prestige: (myData.prestige||0)+1 }); };
         
         window.renderLeaderboard = async (btn) => {
             showView('leaderboard-view', btn);
             const s = await getDocs(query(collection(db, "users"), orderBy("prestige", "desc"), orderBy("wordCount", "desc")));
-            const l = document.getElementById('leaderboard-list'); l.innerHTML = '<h3 style="color:white">RANKINGS</h3>';
-            s.forEach((d, i) => { const u = d.data(); l.innerHTML += `<div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #111;"><span>${i+1}. ${u.email.split('@')[0]} ${"★".repeat(u.prestige)}</span><span>${Math.floor(u.wordCount)} XP</span></div>`; });
-        };
-
-        function renderStaticMarket() {
-            const tags = [{n:'ELITE', p:500}, {n:'SCHOLAR', p:200}, {n:'GOAT', p:1000}];
-            document.getElementById('tag-grid').innerHTML = tags.map(t => `<div class="store-card" onclick="buyTag('${t.n}', ${t.p})">${t.n}<br>$${t.p}</div>`).join('');
-        }
-        window.buyTag = async (tag, p) => {
-            if(myData.credits >= p) { await updateDoc(doc(db, "users", currentUser.uid), { credits: myData.credits - p, tag: tag }); alert("Tag Set!"); }
+            const l = document.getElementById('leader-list'); l.innerHTML = '<h3 style="color:white">RANKINGS</h3>';
+            s.forEach((d, i) => { const u = d.data(); l.innerHTML += `<div style="padding:15px; border-bottom:1px solid #111;">${i+1}. ${u.email.split('@')[0]} ${"★".repeat(u.prestige)} - ${Math.floor(u.wordCount)} XP</div>`; });
         };
 
         window.showView = (id, btn) => {
@@ -391,13 +315,12 @@ function renderMarketNotes(items) {
 
         document.getElementById('chat-send').onclick = () => {
             const t = document.getElementById('chat-in').value;
-            if(t) push(ref(rtd, 'messages'), { uid: currentUser.uid, sender: currentUser.email.split('@')[0], text: t, pres: myData.prestige, tag: myData.tag || "" });
+            if(t) push(ref(rtd, 'messages'), { uid: currentUser.uid, sender: currentUser.email.split('@')[0], text: t, pres: myData.prestige });
             document.getElementById('chat-in').value = '';
         };
 
-        window.createNewNote = async () => await addDoc(collection(db, "notes"), { title: "Untitled", content: "", access: [currentUser.uid], owner: currentUser.uid });
-        window.createNewDeck = () => { const n = prompt("DECK NAME?"); if(n) { activeDeck = []; currentDeckName = n.toUpperCase(); showView('cards-view'); } };
-        window.closeModal = () => document.getElementById('card-modal').style.display='none';
+        window.createNewNote = async () => await addDoc(collection(db, "notes"), { title: "New Note", content: "", access: [currentUser.uid], owner: currentUser.uid });
+        window.shareNote = () => { const id = prompt("USER ID?"); if(id && currentNoteId) updateDoc(doc(db, "notes", currentNoteId), { access: arrayUnion(id) }); };
     </script>
 </body>
 </html>
