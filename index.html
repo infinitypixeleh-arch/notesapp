@@ -27,8 +27,17 @@
         #rich-editor { flex: 1; padding: 20px 80px; font-size: 1rem; line-height: 1.8; color: #c0c0c0; outline: none; overflow-y: auto; }
         #note-title { font-size: 2.2rem; background: transparent; border: none; color: var(--text-focus); padding: 60px 80px 10px 80px; font-weight: 600; width: 100%; }
 
-        .msg-bubble { background: #111; padding: 12px 18px; border-radius: 8px; max-width: 70%; border: 1px solid #151515; color: #ccc; margin-bottom: 10px; }
-        .msg-bubble.own { align-self: flex-end; border-color: var(--u-color, var(--accent)); }
+       /* Update your .msg-bubble class to handle dynamic borders */
+    .msg-bubble { 
+    background: #111; 
+    padding: 12px 18px; 
+    border-radius: 8px; 
+    max-width: 70%; 
+    border: 1px solid #151515; /* Default border */
+    color: #ccc; 
+    margin-bottom: 10px; 
+    }
+    .msg-bubble.own { align-self: flex-end; }
         .tag-badge { font-size: 0.55rem; padding: 2px 6px; border-radius: 4px; background: #222; color: #fff; margin-left: 5px; border: 1px solid #333; }
 
         .xp-bar-container { width: 100%; height: 3px; background: #111; margin-top: 8px; border-radius: 2px; overflow: hidden; }
@@ -41,7 +50,28 @@
         .card-back { transform: rotateY(180deg); background: #111; color: var(--accent); }
 
         .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; margin-bottom: 40px;}
-        .store-card { background: #0a0a0a; border: 1px solid #151515; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.75rem; position: relative; }
+        /* Tooltip styling for the preview */
+        .store-card { position: relative; }
+
+        .preview-tooltip { 
+        visibility: hidden; 
+        position: absolute; 
+        bottom: 110%; 
+        left: 0; 
+        width: 220px; 
+        background: #151515; 
+        border: 1px solid #333; 
+        padding: 12px; 
+        border-radius: 8px; 
+        font-size: 0.7rem; 
+        color: #888; 
+        text-align: left; 
+        z-index: 100; 
+        pointer-events: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+.store-card:hover .preview-tooltip { visibility: visible; }
         
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
         .modal-content { background: #0d0d0d; border: 1px solid #222; padding: 30px; border-radius: 10px; width: 380px; }
@@ -49,6 +79,7 @@
         
         .card-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         .btn-sm { padding: 5px 10px; font-size: 0.6rem; cursor: pointer; background: transparent; border: 1px solid #333; color: #555; }
+    
     </style>
 </head>
 <body>
@@ -173,7 +204,17 @@
             const e = document.getElementById('email').value, p = document.getElementById('pass').value;
             signInWithEmailAndPassword(auth,e,p).catch(()=>createUserWithEmailAndPassword(auth,e,p));
         };
-
+const getIDColor = (id) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    let color = '#';
+    for (let i = 0; i < 3; i++) {
+        // Math keeps the colors bright enough for dark mode
+        let value = (hash >> (i * 8)) & 0xFF;
+        color += ('00' + (Math.floor(value * 0.7) + 80).toString(16)).substr(-2);
+    }
+    return color;
+};
         function calculateLvl(xp) {
             let lvl = 1, req = 100;
             while(xp >= req) { xp -= req; req *= 1.1; lvl++; }
@@ -230,14 +271,44 @@
             });
         };
 
-        window.listNoteOnMarket = async () => {
-            const price = prompt("SET PRICE FOR THIS NOTE?");
-            const note = allNotes.find(n => n.id === currentNoteId);
-            if(note && price) {
-                await addDoc(collection(db, "market"), { noteId: currentNoteId, title: note.title, price: parseInt(price), seller: currentUser.uid });
-                alert("Note listed on market!");
-            }
-        };
+        // Function to list a note with a text snippet
+window.listNoteOnMarket = async () => {
+    const price = prompt("SET PRICE FOR THIS NOTE?");
+    const note = allNotes.find(n => n.id === currentNoteId);
+    if(note && price) {
+        // Strip HTML tags for the preview snippet
+        const plainText = note.content.replace(/<[^>]*>?/gm, '');
+        const snippet = plainText.substring(0, 120) + "...";
+        
+        await addDoc(collection(db, "market"), { 
+            noteId: currentNoteId, 
+            title: note.title, 
+            price: parseInt(price), 
+            preview: snippet,
+            seller: user.uid 
+        });
+        alert("Listed with preview!");
+    }
+};
+
+// Function to render the marketplace with tooltips
+function renderMarketNotes(items) {
+    const grid = document.getElementById('market-notes-grid');
+    grid.innerHTML = '';
+    items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'store-card';
+        card.innerHTML = `
+            <div class="preview-tooltip">
+                <b style="color:#eee">PREVIEW:</b><br>${item.preview}
+            </div>
+            <div>${item.title}</div>
+            <div style="color:var(--credits); font-size:0.7rem; margin-top:5px;">$${item.price}</div>
+        `;
+        card.onclick = () => buyNote(item);
+        grid.appendChild(card);
+    });
+}
 
         function renderMarketNotes(items) {
             const grid = document.getElementById('market-notes-grid'); grid.innerHTML = '';
