@@ -27,12 +27,15 @@
         #rich-editor { flex: 1; padding: 20px 80px; font-size: 1rem; line-height: 1.8; color: #c0c0c0; outline: none; overflow-y: auto; }
         #note-title { font-size: 2.2rem; background: transparent; border: none; color: var(--text-focus); padding: 60px 80px 10px 80px; font-weight: 600; width: 100%; }
 
+        /* CHAT SYSTEM */
         .msg-bubble { background: #111; padding: 12px 18px; border-radius: 8px; max-width: 70%; border: 1px solid #151515; color: #ccc; margin-bottom: 10px; position: relative; }
         .msg-bubble.own { align-self: flex-end; }
         .tag-badge { font-size: 0.55rem; padding: 2px 6px; border-radius: 4px; background: #222; color: #fff; margin-left: 5px; border: 1px solid #333; vertical-align: middle; }
 
+        /* MARKET & UI */
         .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
         .store-card { background: #0a0a0a; border: 1px solid #151515; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; position: relative; transition: 0.2s; }
+        .store-card:hover { border-color: #333; }
         
         .preview-tooltip { 
             visibility: hidden; position: absolute; bottom: 115%; left: 0; width: 220px; 
@@ -45,6 +48,7 @@
         .xp-bar-container { width: 100%; height: 3px; background: #111; margin-top: 8px; border-radius: 2px; overflow: hidden; }
         #xp-fill { height: 100%; background: var(--xp); width: 0%; transition: 0.4s; }
         
+        /* FLASHCARDS */
         .card-container { perspective: 1000px; width: 450px; height: 280px; margin: 30px auto; cursor: pointer; }
         .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
         .card-inner.flipped { transform: rotateY(180deg); }
@@ -100,8 +104,8 @@
             <div id="market-notes-grid" class="market-grid"></div>
             <div class="nav-label" style="margin-top:40px;">FLASHCARD DECKS</div>
             <div id="market-cards-grid" class="market-grid"></div>
-            <div class="nav-label" style="margin-top:40px;">NAME TAGS</div>
-            <div id="market-tags-grid" class="market-grid"></div>
+            <div class="nav-label" style="margin-top:40px;">COSMETICS</div>
+            <div id="market-cosmetics-grid" class="market-grid"></div>
         </div>
 
         <div id="cards-view" class="view" style="padding:80px;">
@@ -133,8 +137,8 @@
         <div id="profile-view" class="view" style="padding:80px; align-items:center;">
             <h1 id="p-xp" style="font-size:4rem; color:white; margin:0;">0</h1>
             <p id="p-lvl">LEVEL 1</p>
-            <button id="prestige-btn" onclick="doPrestige()" style="display:none; padding:15px 40px; background:var(--star); color:black; font-weight:800; border:0; cursor:pointer;">ASCEND</button>
             <div id="p-stars" style="font-size:1.5rem; color:var(--star); margin-top:20px;"></div>
+            <button id="prestige-btn" onclick="doPrestige()" style="display:none; padding:15px 40px; background:var(--star); color:black; font-weight:800; border:0; margin-top:20px; cursor:pointer;">ASCEND</button>
         </div>
 
         <div id="leaderboard-view" class="view" style="padding:80px;"><div id="leader-list"></div></div>
@@ -143,7 +147,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, where, addDoc, updateDoc, getDocs, orderBy, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, collection, query, where, addDoc, updateDoc, getDocs, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI", authDomain: "infnotes.firebaseapp.com", projectId: "infnotes", databaseURL: "https://infnotes-default-rtdb.asia-southeast1.firebasedatabase.app/", appId: "1:976520833702:web:ce8aa0afc1a6131da7e267" };
@@ -151,6 +155,7 @@
 
         let currentUser, currentNoteId, currentDeckName, myData = {}, allNotes = [], allCards = [], activeDeck = [], curIdx = 0;
 
+        // --- COLOR LOGIC ---
         const getIDColor = (id) => {
             let hash = 0;
             for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
@@ -176,7 +181,7 @@
 
         async function init() {
             onSnapshot(doc(db, "users", currentUser.uid), snap => {
-                myData = snap.data() || { wordCount: 0, prestige: 0, credits: 0, tag: "" };
+                myData = snap.data() || { wordCount: 0, prestige: 0, credits: 0, tag: "", color: "" };
                 const { lvl, progress } = calculateLvl(myData.wordCount);
                 document.getElementById('lvl-text').innerText = `LVL ${lvl}`;
                 document.getElementById('xp-fill').style.width = progress + "%";
@@ -201,12 +206,12 @@
 
             onChildAdded(ref(rtd, 'messages'), s => {
                 const m = s.val();
-                const uColor = getIDColor(m.uid);
+                const chatColor = m.color || getIDColor(m.uid);
                 const d = document.createElement('div');
                 d.className = `msg-bubble ${m.uid === currentUser.uid ? 'own' : ''}`;
-                d.style.borderColor = uColor;
+                d.style.borderColor = chatColor;
                 d.innerHTML = `
-                    <div style="font-size:0.6rem; color:${uColor}; font-weight:600; margin-bottom:4px;">
+                    <div style="font-size:0.6rem; color:${chatColor}; font-weight:600; margin-bottom:4px;">
                         ${m.sender} ${m.tag ? `<span class="tag-badge">${m.tag}</span>` : ""} ${"★".repeat(m.pres||0)}
                     </div>
                     <div>${m.text}</div>
@@ -214,7 +219,7 @@
                 document.getElementById('chat-history').appendChild(d);
                 document.getElementById('chat-history').scrollTop = 9999;
             });
-            renderStaticMarket();
+            renderCosmetics();
         }
 
         /* --- NOTES & MARKET --- */
@@ -268,12 +273,28 @@
             });
         }
 
-        function renderStaticMarket() {
-            const tags = [{n:'PRO', p:500}, {n:'ELITE', p:1000}, {n:'MYTHIC', p:5000}];
-            document.getElementById('market-tags-grid').innerHTML = tags.map(t => `<div class="store-card" onclick="buyTag('${t.n}', ${t.p})">${t.n}<br><span style="color:var(--credits)">$${t.p}</span></div>`).join('');
+        function renderCosmetics() {
+            const items = [
+                {type:'tag', n:'PRO', p:500}, {type:'tag', n:'ELITE', p:1000},
+                {type:'color', n:'Electric Purple', v:'#a29bfe', p:300},
+                {type:'color', n:'Neon Green', v:'#55efc4', p:300},
+                {type:'color', n:'Crimson', v:'#ff7675', p:300},
+                {type:'color', n:'Gold', v:'#f1c40f', p:1000}
+            ];
+            document.getElementById('market-cosmetics-grid').innerHTML = items.map(t => `
+                <div class="store-card" onclick="buyCosmetic('${t.type}', '${t.n}', '${t.v || ''}', ${t.p})">
+                    ${t.n}<br><span style="color:var(--credits)">$${t.p}</span>
+                </div>
+            `).join('');
         }
-        window.buyTag = async (n, p) => {
-            if(myData.credits >= p) { await updateDoc(doc(db, "users", currentUser.uid), { credits: myData.credits - p, tag: n }); alert("Tag Applied!"); }
+        window.buyCosmetic = async (type, n, v, p) => {
+            if(myData.credits >= p) { 
+                const update = { credits: myData.credits - p };
+                if(type === 'tag') update.tag = n;
+                if(type === 'color') update.color = v;
+                await updateDoc(doc(db, "users", currentUser.uid), update); 
+                alert("Applied!"); 
+            }
         };
 
         /* --- FLASHCARDS --- */
@@ -294,7 +315,6 @@
                 };
                 grid.appendChild(d);
             });
-            // New Deck Button
             const add = document.createElement('div'); add.className = 'store-card'; add.style.borderStyle = 'dashed'; add.innerText = '+ NEW DECK';
             add.onclick = () => { const n = prompt("DECK NAME?"); if(n) { currentDeckName = n.toUpperCase(); openCardModal(); } };
             grid.appendChild(add);
@@ -353,7 +373,7 @@
 
         document.getElementById('chat-send').onclick = () => {
             const t = document.getElementById('chat-in').value;
-            if(t) push(ref(rtd, 'messages'), { uid: currentUser.uid, sender: currentUser.email.split('@')[0], text: t, pres: myData.prestige, tag: myData.tag || "" });
+            if(t) push(ref(rtd, 'messages'), { uid: currentUser.uid, sender: currentUser.email.split('@')[0], text: t, pres: myData.prestige, tag: myData.tag || "", color: myData.color || "" });
             document.getElementById('chat-in').value = '';
         };
 
