@@ -34,44 +34,45 @@
         .xp-bar-container { width: 100%; height: 3px; background: #111; margin-top: 8px; border-radius: 2px; overflow: hidden; }
         #xp-fill { height: 100%; background: var(--xp); width: 0%; transition: width 0.4s ease; }
         
-        /* Flashcard Styling */
-        .card-container { perspective: 1000px; width: 450px; height: 280px; margin: 40px auto; cursor: pointer; }
+        .card-container { perspective: 1000px; width: 450px; height: 280px; margin: 30px auto; cursor: pointer; }
         .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
         .card-inner.flipped { transform: rotateY(180deg); }
         .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 40px; border: 1px solid var(--border); border-radius: 12px; background: #0a0a0a; color: white; font-size: 1.2rem; }
         .card-back { transform: rotateY(180deg); background: #111; color: var(--accent); }
 
         .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; margin-bottom: 40px;}
-        .store-card { background: #0a0a0a; border: 1px solid #151515; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.75rem; }
+        .store-card { background: #0a0a0a; border: 1px solid #151515; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.75rem; position: relative; }
         
-        /* Modal */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
-        .modal-content { background: #0d0d0d; border: 1px solid #222; padding: 30px; border-radius: 10px; width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .modal-content { background: #0d0d0d; border: 1px solid #222; padding: 30px; border-radius: 10px; width: 380px; }
         .nice-input { width: 100%; background: #151515; border: 1px solid #222; color: #fff; padding: 12px; margin-bottom: 15px; border-radius: 5px; outline: none; }
-        .nice-input:focus { border-color: var(--accent); }
+        
+        .card-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .btn-sm { padding: 5px 10px; font-size: 0.6rem; cursor: pointer; background: transparent; border: 1px solid #333; color: #555; }
+        .btn-sm:hover { border-color: #666; color: #888; }
     </style>
 </head>
 <body>
 
     <div id="card-modal" class="modal">
         <div class="modal-content">
-            <h4 style="margin: 0 0 20px 0; color: white; letter-spacing: 1px;">NEW FLASHCARD</h4>
-            <div style="font-size: 0.6rem; color: #444; margin-bottom: 5px;">ADDING TO: <span id="target-deck-label" style="color:var(--accent)"></span></div>
+            <h4 id="modal-title" style="margin: 0 0 20px 0; color: white;">NEW FLASHCARD</h4>
+            <div style="font-size: 0.6rem; color: #444; margin-bottom: 5px;">DECK: <span id="target-deck-label" style="color:var(--accent)"></span></div>
             <input type="text" id="q-in" class="nice-input" placeholder="Question">
             <input type="text" id="a-in" class="nice-input" placeholder="Answer">
             <div style="display:flex; gap:10px;">
-                <button onclick="saveNewCard()" style="flex:2; padding:12px; background:white; color:black; border:0; cursor:pointer; font-weight:600; border-radius:4px;">SAVE CARD</button>
-                <button onclick="closeModal()" style="flex:1; padding:12px; background:#222; color:white; border:0; cursor:pointer; border-radius:4px;">CANCEL</button>
+                <button onclick="saveNewCard()" style="flex:2; padding:12px; background:white; color:black; border:0; cursor:pointer; font-weight:600;">SAVE</button>
+                <button onclick="closeModal()" style="flex:1; padding:12px; background:#222; color:white; border:0; cursor:pointer;">CANCEL</button>
             </div>
         </div>
     </div>
 
     <div id="auth-overlay" style="position:fixed; inset:0; background:var(--bg); z-index:5000; display:flex; align-items:center; justify-content:center;">
         <div style="width:300px; text-align:center;">
-            <h1 style="letter-spacing:5px; color:white; font-weight:400;">INFNOTES</h1>
-            <input type="email" id="email" placeholder="Email" style="width:100%; padding:12px; margin-bottom:10px; background:transparent; border:1px solid #151515; color:white;">
-            <input type="password" id="pass" placeholder="Password" style="width:100%; padding:12px; margin-bottom:20px; background:transparent; border:1px solid #151515; color:white;">
-            <button id="login-btn" style="width:100%; padding:12px; background:white; color:black; border:none; cursor:pointer; font-weight:600;">ENTER</button>
+            <h1 style="letter-spacing:5px; color:white;">INFNOTES</h1>
+            <input type="email" id="email" placeholder="Email" style="width:100%; padding:12px; margin-bottom:10px; background:0; border:1px solid #151515; color:white;">
+            <input type="password" id="pass" placeholder="Password" style="width:100%; padding:12px; margin-bottom:20px; background:0; border:1px solid #151515; color:white;">
+            <button id="login-btn" style="width:100%; padding:12px; background:white; border:none; cursor:pointer; font-weight:600;">ENTER</button>
         </div>
     </div>
 
@@ -84,18 +85,15 @@
             <div class="xp-bar-container"><div id="xp-fill"></div></div>
             <div id="my-creds" style="color:var(--credits); font-size:0.6rem; margin-top:5px;">$0</div>
         </div>
-
         <div class="nav-item active" onclick="showView('notes-view', this)">Notes</div>
         <div class="nav-item" onclick="showView('cards-view', this)">Flashcards</div>
         <div class="nav-item" onclick="showView('messages-view', this)">Chat</div>
         <div class="nav-item" onclick="renderLeaderboard(this)">Leaderboard</div>
         <div class="nav-item" onclick="showView('store-view', this)">Market</div>
         <div class="nav-item" onclick="showMyProfile(this)">Profile</div>
-
         <div class="nav-label">Files</div>
         <div id="folder-root"></div>
         <button onclick="createNewNote()" style="margin-top:20px; background:transparent; color:#444; border:1px solid #151515; padding:10px; cursor:pointer; font-size:0.7rem;">+ NEW NOTE</button>
-
         <div class="nav-label">Squad</div>
         <div id="user-root"></div>
     </aside>
@@ -103,8 +101,8 @@
     <div class="view-container">
         <div id="notes-view" class="view active">
             <div style="position:absolute; top:30px; right:60px; display:flex; gap:15px;">
-                <button onclick="shareNote()" style="color:var(--accent); background:transparent; border:none; cursor:pointer; font-size:0.7rem;">SHARE</button>
-                <button onclick="deleteNote()" style="color:#633; background:transparent; border:none; cursor:pointer; font-size:0.7rem;">DELETE</button>
+                <button onclick="shareNote()" style="color:var(--accent); background:0; border:0; cursor:pointer; font-size:0.7rem;">SHARE</button>
+                <button onclick="deleteNote()" style="color:#633; background:0; border:0; cursor:pointer; font-size:0.7rem;">DELETE</button>
             </div>
             <input type="text" id="note-title" placeholder="Untitled">
             <div id="rich-editor" contenteditable="true"></div>
@@ -121,9 +119,9 @@
             
             <div id="study-area" style="display:none;">
                 <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 20px;">
-                    <button onclick="exitDeck()" style="background:transparent; border:none; color:#555; cursor:pointer; font-size:0.7rem;">< BACK</button>
+                    <button onclick="exitDeck()" style="background:0; border:0; color:#555; cursor:pointer; font-size:0.7rem;">< BACK</button>
                     <h4 id="active-deck-title" style="color:white; margin:0; font-weight:400;"></h4>
-                    <button onclick="openCardModal()" style="background:var(--accent); border:none; color:black; padding:5px 10px; cursor:pointer; font-size:0.6rem; font-weight:600;">+ ADD CARD</button>
+                    <button onclick="openCardModal()" style="background:var(--accent); border:0; color:black; padding:5px 10px; cursor:pointer; font-size:0.6rem; font-weight:600;">+ ADD CARD</button>
                 </div>
                 <div class="card-container" onclick="this.querySelector('.card-inner').classList.toggle('flipped')">
                     <div class="card-inner">
@@ -132,37 +130,27 @@
                     </div>
                 </div>
                 <div style="display:flex; gap:10px; justify-content:center;">
-                    <button onclick="nextCard(false)" style="background:#111; color:#555; border:1px solid #222; padding:12px 25px; cursor:pointer; border-radius:4px;">SKIP</button>
-                    <button onclick="nextCard(true)" style="background:var(--accent); color:black; border:none; padding:12px 25px; cursor:pointer; font-weight:600; border-radius:4px;">MASTERED (+5 XP)</button>
+                    <button onclick="nextCard(false)" style="background:#111; color:#555; border:1px solid #222; padding:12px 25px; cursor:pointer;">SKIP</button>
+                    <button onclick="nextCard(true)" style="background:var(--accent); color:black; border:none; padding:12px 25px; cursor:pointer; font-weight:600;">MASTERED</button>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-sm" onclick="editCurrentCard()">EDIT CARD</button>
+                    <button class="btn-sm" onclick="deleteCurrentCard()" style="color:#633">DELETE CARD</button>
                 </div>
             </div>
         </div>
 
-        <div id="leaderboard-view" class="view" style="padding:100px;">
-            <h3 style="color:white; font-weight:400;">GLOBAL RANKINGS</h3>
-            <div id="leaderboard-list"></div>
-        </div>
-
+        <div id="leaderboard-view" class="view" style="padding:100px;"><h3 style="color:white;">GLOBAL RANKINGS</h3><div id="leaderboard-list"></div></div>
+        
         <div id="store-view" class="view" style="padding:100px;">
-            <h3 style="color:white; font-weight:400;">MARKET</h3>
+            <h3 style="color:white;">MARKET</h3>
             <div style="color:var(--credits); font-size:0.8rem; margin-bottom:30px;">CREDITS: <span id="store-balance">$0</span></div>
-            
-            <div class="nav-label">PRESTIGE</div>
-            <div id="prestige-banner" style="display:none; margin-bottom:30px; padding:20px; border:1px solid #333; background:#0f0505;">
-                <button onclick="prestigeNow()" style="background:#c0392b; color:white; border:none; padding:10px 20px; cursor:pointer;">ASCEND (PRESTIGE)</button>
-            </div>
-
-            <div class="nav-label">CHAT COLORS</div>
-            <div class="store-grid" id="color-grid"></div>
-
-            <div class="nav-label">NAME TAGS</div>
-            <div class="store-grid" id="tag-grid"></div>
+            <div class="nav-label">CHAT COLORS</div><div class="store-grid" id="color-grid"></div>
+            <div class="nav-label">NAME TAGS</div><div class="store-grid" id="tag-grid"></div>
         </div>
 
         <div id="profile-view" class="view" style="padding:100px;">
-            <h3 style="color:white; font-weight:400;">USER PROFILE</h3>
-            <div id="p-words" style="font-size:3.5rem; color:white; font-weight:300;">0</div>
-            <div style="font-size:0.7rem; color:var(--accent); letter-spacing:1px; margin-bottom:40px;">TOTAL XP</div>
+            <div id="p-words" style="font-size:3.5rem; color:white;">0</div>
             <div id="p-prestige" style="color:#ff7675;">PRESTIGE: 0</div>
             <div id="p-stars" style="font-size:1.5rem; color:var(--star)"></div>
         </div>
@@ -170,8 +158,8 @@
         <div id="messages-view" class="view">
             <div id="chat-history"></div>
             <div style="padding:30px 50px; border-top:1px solid var(--border); display:flex; gap:20px;">
-                <input type="text" id="chat-in" style="flex:1; background:transparent; border:none; color:white;" placeholder="Broadcast to squad...">
-                <button id="chat-send" style="background:transparent; border:none; color:var(--accent); cursor:pointer;">SEND</button>
+                <input type="text" id="chat-in" style="flex:1; background:0; border:0; color:white;" placeholder="Message...">
+                <button id="chat-send" style="background:0; border:0; color:var(--accent); cursor:pointer;">SEND</button>
             </div>
         </div>
     </div>
@@ -197,7 +185,7 @@
         const db = getFirestore(app);
         const rtd = getDatabase(app);
 
-        let currentUser, currentNoteId, allNotes = [], myData = {}, presenceList = {}, allCards = [], currentDeckName = null, activeDeckCards = [], curCardIdx = 0;
+        let currentUser, currentNoteId, allNotes = [], myData = {}, presenceList = {}, allCards = [], currentDeckName = null, activeDeckCards = [], curCardIdx = 0, editingCardId = null;
 
         onAuthStateChanged(auth, async (u) => {
             if (u) {
@@ -230,14 +218,12 @@
                 renderSidebar();
                 syncProgress();
             });
-
             onSnapshot(query(collection(db, "cards"), where("owner", "==", currentUser.uid)), (snap) => {
-                allCards = snap.docs.map(d => d.data());
+                allCards = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 renderDecks();
+                if(currentDeckName) activeDeckCards = allCards.filter(c => c.deck === currentDeckName);
             });
-
             onValue(ref(rtd, 'online'), (snap) => { presenceList = snap.val() || {}; renderUserList(); });
-
             onChildAdded(ref(rtd, 'messages'), (snap) => {
                 const m = snap.val();
                 const div = document.createElement('div');
@@ -248,7 +234,6 @@
                 document.getElementById('chat-history').appendChild(div);
                 document.getElementById('chat-history').scrollTop = 99999;
             });
-
             renderMarket();
         }
 
@@ -258,7 +243,6 @@
             const stats = calculateLvl(total);
             let creds = myData.credits || 0;
             if (stats.lvl > (myData.last_lvl || 1)) creds += (stats.lvl - (myData.last_lvl || 1)) * 10;
-            
             await setDoc(doc(db, "users", currentUser.uid), {
                 wordCount: total, last_lvl: stats.lvl, credits: creds, prestige: myData.prestige || 0, uid: currentUser.uid, email: currentUser.email, bonus: myData.bonus || 0, color: myData.color || '#a29bfe'
             }, { merge: true });
@@ -271,31 +255,47 @@
             document.getElementById('my-stars').innerText = "★".repeat(myData.prestige || 0);
             document.getElementById('my-creds').innerText = `$${myData.credits || 0}`;
             document.getElementById('store-balance').innerText = `$${myData.credits || 0}`;
-            document.getElementById('prestige-banner').style.display = stats.lvl >= 50 ? 'block' : 'none';
+            document.getElementById('p-words').innerText = myData.wordCount || 0;
+            document.getElementById('p-prestige').innerText = `PRESTIGE: ${myData.prestige || 0}`;
+            document.getElementById('p-stars').innerText = "★".repeat(myData.prestige || 0);
         }
 
-        /* Deck Logic */
+        /* --- DECK & CARD CRUD --- */
         window.createNewDeck = () => {
             const name = prompt("DECK NAME?");
-            if (name) {
-                // To initialize a deck, we just save a placeholder or wait for first card
-                currentDeckName = name.toUpperCase();
-                startStudy(currentDeckName);
-            }
+            if (name) startStudy(name.toUpperCase());
         };
 
         window.renderDecks = () => {
-            const grid = document.getElementById('deck-grid');
-            grid.innerHTML = '';
+            const grid = document.getElementById('deck-grid'); grid.innerHTML = '';
             const deckNames = [...new Set(allCards.map(c => c.deck))];
             deckNames.forEach(name => {
                 const count = allCards.filter(c => c.deck === name).length;
                 const div = document.createElement('div');
                 div.className = 'store-card';
-                div.innerHTML = `${name}<br><small style="color:var(--accent)">${count} CARDS</small>`;
+                div.innerHTML = `${name}<br><small style="color:var(--accent)">${count} CARDS</small>
+                                 <div style="margin-top:10px; display:flex; gap:5px; justify-content:center;">
+                                    <span onclick="event.stopPropagation(); renameDeck('${name}')" style="font-size:10px; opacity:0.3;">EDIT</span>
+                                    <span onclick="event.stopPropagation(); deleteDeck('${name}')" style="font-size:10px; color:#633;">DEL</span>
+                                 </div>`;
                 div.onclick = () => startStudy(name);
                 grid.appendChild(div);
             });
+        };
+
+        window.renameDeck = async (oldName) => {
+            const newName = prompt("NEW NAME?", oldName);
+            if(newName && newName !== oldName) {
+                const toUpdate = allCards.filter(c => c.deck === oldName);
+                for(let c of toUpdate) await updateDoc(doc(db, "cards", c.id), { deck: newName.toUpperCase() });
+            }
+        };
+
+        window.deleteDeck = async (name) => {
+            if(confirm(`DELETE ALL CARDS IN ${name}?`)) {
+                const toDelete = allCards.filter(c => c.deck === name);
+                for(let c of toDelete) await deleteDoc(doc(db, "cards", c.id));
+            }
         };
 
         window.startStudy = (name) => {
@@ -304,32 +304,24 @@
             document.getElementById('deck-list-container').style.display = 'none';
             document.getElementById('study-area').style.display = 'block';
             document.getElementById('active-deck-title').innerText = name;
-            curCardIdx = 0;
-            showCard();
+            curCardIdx = 0; showCard();
         };
 
         function showCard() {
-            const container = document.getElementById('study-area');
             if (activeDeckCards.length === 0) {
-                document.getElementById('card-q').innerText = "NO CARDS YET";
-                document.getElementById('card-a').innerText = "CLICK '+ ADD CARD'";
+                document.getElementById('card-q').innerText = "EMPTY DECK";
+                document.getElementById('card-a').innerText = "ADD CARDS TO START";
                 return;
             }
-            if (curCardIdx >= activeDeckCards.length) {
-                alert("DECK FINISHED");
-                exitDeck(); return;
-            }
+            if (curCardIdx >= activeDeckCards.length) { exitDeck(); return; }
             document.getElementById('card-q').innerText = activeDeckCards[curCardIdx].q;
             document.getElementById('card-a').innerText = activeDeckCards[curCardIdx].a;
             document.querySelector('.card-inner').classList.remove('flipped');
         }
 
         window.nextCard = async (mastered) => {
-            if (mastered && activeDeckCards.length > 0) {
-                await updateDoc(doc(db, "users", currentUser.uid), { bonus: (myData.bonus || 0) + 5 });
-            }
-            curCardIdx++;
-            showCard();
+            if (mastered && activeDeckCards.length > 0) await updateDoc(doc(db, "users", currentUser.uid), { bonus: (myData.bonus || 0) + 5 });
+            curCardIdx++; showCard();
         };
 
         window.exitDeck = () => {
@@ -338,43 +330,50 @@
             currentDeckName = null;
         };
 
-        /* Modal Logic */
         window.openCardModal = () => {
+            editingCardId = null;
+            document.getElementById('modal-title').innerText = "NEW FLASHCARD";
             document.getElementById('target-deck-label').innerText = currentDeckName;
+            document.getElementById('q-in').value = ''; document.getElementById('a-in').value = '';
             document.getElementById('card-modal').style.display = 'flex';
         };
-        window.closeModal = () => { document.getElementById('card-modal').style.display = 'none'; };
-        window.saveNewCard = async () => {
-            const q = document.getElementById('q-in').value;
-            const a = document.getElementById('a-in').value;
-            if (q && a && currentDeckName) {
-                await addDoc(collection(db, "cards"), { q, a, deck: currentDeckName, owner: currentUser.uid });
-                document.getElementById('q-in').value = '';
-                document.getElementById('a-in').value = '';
-                closeModal();
+
+        window.editCurrentCard = () => {
+            const card = activeDeckCards[curCardIdx];
+            if(!card) return;
+            editingCardId = card.id;
+            document.getElementById('modal-title').innerText = "EDIT FLASHCARD";
+            document.getElementById('q-in').value = card.q;
+            document.getElementById('a-in').value = card.a;
+            document.getElementById('card-modal').style.display = 'flex';
+        };
+
+        window.deleteCurrentCard = async () => {
+            const card = activeDeckCards[curCardIdx];
+            if(card && confirm("DELETE THIS CARD?")) {
+                await deleteDoc(doc(db, "cards", card.id));
+                showCard();
             }
         };
 
-        /* Market Logic */
-        function renderMarket() {
-            const colors = [
-                {n:'ROSE', c:'#ff7675'}, {n:'MINT', c:'#55efc4'}, {n:'GOLD', c:'#fdcb6e'},
-                {n:'VIOLET', c:'#a29bfe'}, {n:'CYAN', c:'#00d2d3'}, {n:'ORANGE', c:'#ff9f43'}
-            ];
-            const tags = [{n:'ELITE', p:100}, {n:'GOAT', p:200}, {n:'SCHOLAR', p:150}, {n:'DEV', p:50}];
-            
-            document.getElementById('color-grid').innerHTML = colors.map(cl => `
-                <div class="store-card" onclick="buyItem('color', '${cl.c}', 50)">
-                    <div style="width:10px; height:10px; background:${cl.c}; margin:0 auto 10px; border-radius:50%;"></div>
-                    ${cl.n} ($50)
-                </div>
-            `).join('');
+        window.saveNewCard = async () => {
+            const q = document.getElementById('q-in').value, a = document.getElementById('a-in').value;
+            if (q && a && currentDeckName) {
+                if(editingCardId) await updateDoc(doc(db, "cards", editingCardId), { q, a });
+                else await addDoc(collection(db, "cards"), { q, a, deck: currentDeckName, owner: currentUser.uid });
+                closeModal();
+                showCard();
+            }
+        };
 
-            document.getElementById('tag-grid').innerHTML = tags.map(tg => `
-                <div class="store-card" onclick="buyItem('tag', '${tg.n}', ${tg.p})">
-                    '${tg.n}' TAG ($${tg.p})
-                </div>
-            `).join('');
+        window.closeModal = () => { document.getElementById('card-modal').style.display = 'none'; };
+
+        /* --- MARKET --- */
+        function renderMarket() {
+            const colors = [{n:'ROSE', c:'#ff7675'}, {n:'MINT', c:'#55efc4'}, {n:'GOLD', c:'#fdcb6e'}, {n:'VIOLET', c:'#a29bfe'}, {n:'CYAN', c:'#00d2d3'}, {n:'ORANGE', c:'#ff9f43'}];
+            const tags = [{n:'ELITE', p:100}, {n:'GOAT', p:200}, {n:'SCHOLAR', p:150}, {n:'DEV', p:50}];
+            document.getElementById('color-grid').innerHTML = colors.map(cl => `<div class="store-card" onclick="buyItem('color', '${cl.c}', 50)"><div style="width:10px; height:10px; background:${cl.c}; margin:0 auto 10px; border-radius:50%;"></div>${cl.n} ($50)</div>`).join('');
+            document.getElementById('tag-grid').innerHTML = tags.map(tg => `<div class="store-card" onclick="buyItem('tag', '${tg.n}', ${tg.p})">'${tg.n}' TAG ($${tg.p})</div>`).join('');
         }
 
         window.buyItem = async (type, val, cost) => {
@@ -385,7 +384,7 @@
             } else alert("INSUFFICIENT CREDITS");
         };
 
-        /* Previous Core Functions Re-integrated */
+        /* --- NOTES & CORE --- */
         window.renderSidebar = () => {
             const root = document.getElementById('folder-root'); root.innerHTML = '';
             const folders = [...new Set(allNotes.map(n => n.folder || 'DRAFTS'))];
@@ -397,12 +396,7 @@
                     const i = document.createElement('div');
                     i.className = `nav-item ${currentNoteId === n.id ? 'active' : ''}`;
                     i.innerText = n.title;
-                    i.onclick = () => { 
-                        currentNoteId = n.id; 
-                        document.getElementById('note-title').value = n.title; 
-                        document.getElementById('rich-editor').innerHTML = n.content; 
-                        showView('notes-view', i);
-                    };
+                    i.onclick = () => { currentNoteId = n.id; document.getElementById('note-title').value = n.title; document.getElementById('rich-editor').innerHTML = n.content; showView('notes-view', i); };
                     document.getElementById(`f-${f}`).appendChild(i);
                 });
             });
@@ -429,24 +423,15 @@
             let r = 1;
             snap.forEach(d => {
                 const u = d.data();
-                list.innerHTML += `<div class="leaderboard-row"><div style="width:25px;">${r++}</div><div style="flex:1;">${u.email.split('@')[0].toUpperCase()} ${"★".repeat(u.prestige || 0)}</div><div>${u.wordCount} XP</div></div>`;
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #111; font-size:0.8rem;"><span>${r++}. ${u.email.split('@')[0].toUpperCase()} ${"★".repeat(u.prestige || 0)}</span><span>${u.wordCount} XP</span></div>`;
             });
         };
 
-        window.showMyProfile = (btn) => {
-            showView('profile-view', btn);
-            document.getElementById('p-words').innerText = myData.wordCount || 0;
-            document.getElementById('p-prestige').innerText = `PRESTIGE: ${myData.prestige || 0}`;
-            document.getElementById('p-stars').innerText = "★".repeat(myData.prestige || 0);
-        };
-
+        window.showMyProfile = (btn) => { showView('profile-view', btn); };
         window.showView = (id, btn) => {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(btn) {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                btn.classList.add('active');
-            }
+            if(btn) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); btn.classList.add('active'); }
         };
 
         window.createNewNote = async () => {
@@ -455,22 +440,16 @@
         };
 
         window.shareNote = async () => {
-            const id = prompt("USER ID TO SHARE WITH?");
+            const id = prompt("USER ID?");
             if (id && currentNoteId) await updateDoc(doc(db, "notes", currentNoteId), { access: [...allNotes.find(n=>n.id==currentNoteId).access, id] });
         };
 
         window.deleteNote = async () => {
-            if (currentNoteId && confirm("DELETE THIS NOTE?")) {
-                await deleteDoc(doc(db, "notes", currentNoteId));
-                location.reload();
-            }
+            if (currentNoteId && confirm("DELETE?")) { await deleteDoc(doc(db, "notes", currentNoteId)); location.reload(); }
         };
 
         document.getElementById('rich-editor').oninput = () => {
-            if (currentNoteId) updateDoc(doc(db, "notes", currentNoteId), { 
-                content: document.getElementById('rich-editor').innerHTML, 
-                title: document.getElementById('note-title').value 
-            });
+            if (currentNoteId) updateDoc(doc(db, "notes", currentNoteId), { content: document.getElementById('rich-editor').innerHTML, title: document.getElementById('note-title').value });
         };
 
         document.getElementById('chat-send').onclick = () => {
