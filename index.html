@@ -9,14 +9,13 @@
         :root {
             --bg: #050505; --panel: #0a0a0a; --accent: #a29bfe;
             --text: #888; --text-focus: #e0e0e0; --border: #151515;
-            --sidebar-w: 240px; --online: #55efc4; --xp: #fdcb6e; 
-            --star: #f1c40f; --credits: #00d2d3;
+            --sidebar-w: 240px; --xp: #fdcb6e; --star: #f1c40f; --credits: #00d2d3;
         }
         * { box-sizing: border-box; outline: none; }
         body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
         
         /* SIDEBAR */
-        aside { width: var(--sidebar-w); background: var(--panel); border-right: 1px solid var(--border); padding: 35px 20px; display: flex; flex-direction: column; overflow-y: auto; z-index: 10; }
+        aside { width: var(--sidebar-w); background: var(--panel); border-right: 1px solid var(--border); padding: 35px 20px; display: flex; flex-direction: column; overflow-y: auto; }
         .nav-label { font-size: 0.6rem; color: #333; text-transform: uppercase; letter-spacing: 2px; margin: 25px 0 10px 10px; }
         .nav-item { padding: 8px 10px; cursor: pointer; font-size: 0.75rem; border-radius: 4px; display: flex; justify-content: space-between; color: var(--text); align-items: center; transition: 0.2s; }
         .nav-item:hover, .nav-item.active { color: var(--text-focus); background: #111; }
@@ -30,413 +29,255 @@
         #rich-editor { flex: 1; padding: 20px 80px; font-size: 1rem; line-height: 1.8; color: #c0c0c0; outline: none; overflow-y: auto; }
         #note-title { font-size: 2.2rem; background: transparent; border: none; color: var(--text-focus); padding: 60px 80px 10px 80px; font-weight: 600; width: 100%; }
 
-        /* CHAT RE-FORMATTING */
-        #chat-history { flex: 1; overflow-y: auto; padding: 25px 40px; display: flex; flex-direction: column; gap: 12px; }
-        .msg-container { display: flex; flex-direction: column; max-width: 80%; }
-        .msg-container.own { align-self: flex-end; align-items: flex-end; }
-        .msg-info { font-size: 0.6rem; color: #444; margin-bottom: 4px; display: flex; gap: 8px; align-items: center; }
-        .msg-bubble { background: #111; padding: 10px 14px; border-radius: 12px; border: 1px solid #1a1a1a; color: #eee; font-size: 0.85rem; line-height: 1.4; word-break: break-word; }
-        .msg-container.own .msg-bubble { border-color: var(--u-color, var(--accent)); background: #0d0d0d; border-bottom-right-radius: 2px; }
-        .tag-badge { font-size: 0.5rem; padding: 1px 4px; background: #222; color: var(--accent); border-radius: 3px; border: 1px solid #333; font-weight: 600; text-transform: uppercase; }
-
-        /* FLASHCARDS */
+        /* CARDS */
         .card-container { perspective: 1000px; width: 450px; height: 280px; margin: 20px auto; cursor: pointer; }
         .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
         .card-inner.flipped { transform: rotateY(180deg); }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 40px; border: 1px solid var(--border); border-radius: 12px; background: #0a0a0a; color: white; font-size: 1.2rem; text-align: center; }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 40px; border: 1px solid var(--border); border-radius: 12px; background: #0a0a0a; color: white; text-align: center; }
         .card-back { transform: rotateY(180deg); background: #111; color: var(--accent); }
-        .deck-card { background: #0a0a0a; border: 1px solid #151515; padding: 25px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
-        .deck-card:hover { border-color: #333; }
 
-        /* LEADERBOARD */
-        .leader-row { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #111; font-size: 0.8rem; align-items: center; }
-        .leader-row:nth-child(1) { background: rgba(162, 155, 254, 0.05); border-left: 2px solid var(--accent); }
+        /* MARKET */
+        .market-item { background: #0a0a0a; border: 1px solid #111; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .tag-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; }
 
-        /* MODALS */
+        /* CHAT */
+        #chat-history { flex: 1; overflow-y: auto; padding: 25px 40px; display: flex; flex-direction: column; gap: 12px; }
+        .msg-bubble { background: #111; padding: 10px 14px; border-radius: 12px; border: 1px solid #1a1a1a; color: #eee; font-size: 0.85rem; }
+
+        /* UTILS */
+        .xp-bar-container { width: 100%; height: 3px; background: #111; margin-top: 8px; border-radius: 2px; overflow: hidden; }
+        #xp-fill { height: 100%; background: var(--xp); width: 0%; transition: 0.4s; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; }
         .modal-content { background: #0d0d0d; border: 1px solid #222; padding: 30px; border-radius: 10px; width: 380px; }
-        
-        /* XP BAR */
-        .xp-bar-container { width: 100%; height: 3px; background: #111; margin-top: 8px; border-radius: 2px; overflow: hidden; }
-        #xp-fill { height: 100%; background: var(--xp); width: 0%; transition: width 0.4s ease; }
     </style>
 </head>
 <body>
 
     <div id="auth-overlay" style="position:fixed; inset:0; background:var(--bg); z-index:5000; display:flex; align-items:center; justify-content:center;">
         <div style="width:300px; text-align:center;">
-            <h1 style="letter-spacing:5px; color:white; font-weight:400; margin-bottom:30px;">INFNOTES</h1>
+            <h1 style="letter-spacing:5px; color:white;">InfNotes</h1>
             <input type="email" id="email" placeholder="Email" style="width:100%; padding:12px; margin-bottom:10px; background:0; border:1px solid #151515; color:white;">
             <input type="password" id="pass" placeholder="Password" style="width:100%; padding:12px; margin-bottom:20px; background:0; border:1px solid #151515; color:white;">
-            <button id="login-btn" style="width:100%; padding:12px; background:white; color:black; border:none; cursor:pointer; font-weight:600;">ENTER</button>
+            <button id="login-btn" style="width:100%; padding:12px; background:white; color:black; font-weight:600;">ENTER</button>
         </div>
     </div>
 
-    <div id="card-modal" class="modal">
+    <div id="collab-modal" class="modal">
         <div class="modal-content">
-            <h4 id="modal-title" style="margin: 0 0 20px 0; color: white;">CARD EDITOR</h4>
-            <div style="font-size: 0.6rem; color: #444; margin-bottom: 5px;">DECK: <span id="target-deck-label" style="color:var(--accent)"></span></div>
-            <input type="text" id="q-in" style="width:100%; background:#111; border:1px solid #222; color:white; padding:12px; margin-bottom:10px;" placeholder="Question">
-            <input type="text" id="a-in" style="width:100%; background:#111; border:1px solid #222; color:white; padding:12px; margin-bottom:20px;" placeholder="Answer">
-            <div style="display:flex; gap:10px;">
-                <button onclick="saveNewCard()" style="flex:2; padding:12px; background:white; color:black; border:0; font-weight:600; cursor:pointer;">SAVE</button>
-                <button onclick="closeModal()" style="flex:1; padding:12px; background:#222; color:white; border:0; cursor:pointer;">CANCEL</button>
-            </div>
+            <h4 style="color:white; margin:0 0 20px 0;">ADD COLLABORATOR</h4>
+            <input type="text" id="collab-email" placeholder="User ID" style="width:100%; background:#111; border:1px solid #222; color:white; padding:12px; margin-bottom:20px;">
+            <button onclick="addCollab()" style="width:100%; padding:12px; background:var(--accent); color:black; font-weight:600; border:0;">INVITE</button>
+            <button onclick="closeModal()" style="width:100%; margin-top:10px; background:transparent; color:#444; border:0;">CLOSE</button>
         </div>
     </div>
 
     <aside>
-        <div id="my-rank-area" style="margin-bottom:30px;">
+        <div style="margin-bottom:30px;">
             <div style="display:flex; justify-content:space-between; font-size:0.6rem;">
-                <span id="my-lvl-text">LVL 1</span>
-                <span id="my-stars" style="color:var(--star)"></span>
+                <span id="lvl-txt">LVL 1</span>
+                <span id="stars-txt" style="color:var(--star)"></span>
             </div>
             <div class="xp-bar-container"><div id="xp-fill"></div></div>
-            <div id="my-creds" style="color:var(--credits); font-size:0.6rem; margin-top:5px;">$0</div>
+            <div id="creds-txt" style="color:var(--credits); font-size:0.6rem; margin-top:5px;">$0 CREDITS</div>
         </div>
-
         <div class="nav-item active" onclick="showView('notes-view', this)">Notes</div>
         <div class="nav-item" onclick="showView('cards-view', this)">Flashcards</div>
+        <div class="nav-item" onclick="showView('market-view', this)">Market</div>
+        <div class="nav-item" onclick="loadLeaderboard(this)">Leaderboard</div>
+        <div class="nav-item" onclick="showView('stats-view', this)">Profile</div>
         <div class="nav-item" onclick="showView('messages-view', this)">Chat</div>
-        <div class="nav-item" onclick="renderLeaderboard(this)">Leaderboard</div>
-        <div class="nav-item" onclick="showView('store-view', this)">Market</div>
-
+        
         <div class="nav-label">Files</div>
         <div id="folder-root"></div>
-        <button onclick="createNewNote()" style="margin-top:20px; background:transparent; color:#444; border:1px solid #151515; padding:10px; cursor:pointer; font-size:0.7rem;">+ NEW NOTE</button>
-
-        <div class="nav-label">Squad</div>
-        <div id="user-root"></div>
+        <button onclick="createNewNote()" style="margin-top:20px; background:0; color:#444; border:1px solid #151515; padding:10px; cursor:pointer; font-size:0.7rem;">+ NEW NOTE</button>
     </aside>
 
     <div class="view-container">
         <div id="notes-view" class="view active">
-            <div style="position:absolute; top:30px; right:60px; display:flex; gap:15px;">
-                <button onclick="shareNote()" style="color:var(--accent); background:0; border:0; cursor:pointer; font-size:0.7rem;">SHARE</button>
-                <button onclick="deleteNote()" style="color:#633; background:0; border:0; cursor:pointer; font-size:0.7rem;">DELETE</button>
+            <div style="position:absolute; top:20px; right:40px; display:flex; gap:10px;">
+                <button onclick="openCollab()" style="background:0; border:1px solid #222; color:#555; padding:5px 10px; font-size:0.6rem; cursor:pointer;">SHARE</button>
             </div>
             <input type="text" id="note-title" placeholder="Untitled">
             <div id="rich-editor" contenteditable="true"></div>
         </div>
 
+        <div id="market-view" class="view" style="padding:80px;">
+            <h3 style="color:white; margin-bottom:40px;">TAG MARKET</h3>
+            <div id="market-list">
+                <div class="market-item">
+                    <div><span class="tag-badge" style="background:#ff7675; color:white;">ELITE</span><div style="font-size:0.6rem; color:#444; margin-top:5px;">Costs $500</div></div>
+                    <button onclick="buyTag('ELITE', 500)" style="background:white; border:0; padding:5px 15px; font-size:0.7rem; font-weight:600;">BUY</button>
+                </div>
+                <div class="market-item">
+                    <div><span class="tag-badge" style="background:#74b9ff; color:white;">SCHOLAR</span><div style="font-size:0.6rem; color:#444; margin-top:5px;">Costs $200</div></div>
+                    <button onclick="buyTag('SCHOLAR', 200)" style="background:white; border:0; padding:5px 15px; font-size:0.7rem; font-weight:600;">BUY</button>
+                </div>
+            </div>
+        </div>
+
         <div id="cards-view" class="view" style="padding:80px;">
             <div id="deck-list-ui">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
-                    <h3 style="color:white; margin:0; font-weight:400;">MY DECKS</h3>
-                    <button onclick="createNewDeck()" style="background:0; border:1px solid #222; color:#888; padding:8px 15px; cursor:pointer;">+ NEW DECK</button>
-                </div>
                 <div id="deck-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:20px;"></div>
             </div>
-
             <div id="study-ui" style="display:none;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                    <button onclick="exitDeck()" style="background:0; border:0; color:#444; cursor:pointer;">< BACK</button>
-                    <h4 id="active-deck-name" style="color:white; margin:0; font-weight:400;"></h4>
-                    <button onclick="openCardModal()" style="background:var(--accent); border:0; color:black; padding:6px 12px; font-weight:600; cursor:pointer;">+ ADD CARD</button>
-                </div>
+                <button onclick="exitDeck()" style="background:0; border:0; color:#444; margin-bottom:20px;">< BACK</button>
                 <div class="card-container" onclick="this.querySelector('.card-inner').classList.toggle('flipped')">
-                    <div class="card-inner">
-                        <div class="card-front" id="card-q"></div>
-                        <div class="card-back" id="card-a"></div>
-                    </div>
+                    <div class="card-inner"><div class="card-front" id="card-q"></div><div class="card-back" id="card-a"></div></div>
                 </div>
                 <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
-                    <button onclick="nextCard(false)" style="background:#111; color:#555; border:1px solid #222; padding:12px 20px; cursor:pointer;">SKIP</button>
-                    <button onclick="deferCard()" style="background:#111; color:var(--xp); border:1px solid #333; padding:12px 20px; cursor:pointer;">COME BACK LATER</button>
-                    <button onclick="nextCard(true)" style="background:var(--accent); color:black; border:0; padding:12px 20px; font-weight:600; cursor:pointer;">MASTERED (+5 XP)</button>
-                </div>
-                <div style="text-align:center; margin-top:20px;">
-                    <span onclick="editCurrentCard()" style="font-size:0.6rem; color:#444; cursor:pointer; margin-right:15px;">EDIT CARD</span>
-                    <span onclick="deleteCurrentCard()" style="font-size:0.6rem; color:#633; cursor:pointer;">DELETE CARD</span>
+                    <button onclick="deferCard()" style="background:#111; color:var(--xp); border:1px solid #333; padding:12px 20px;">LATER</button>
+                    <button onclick="nextCard(true)" style="background:var(--accent); color:black; padding:12px 20px; font-weight:600;">MASTERED</button>
                 </div>
             </div>
+        </div>
+
+        <div id="stats-view" class="view" style="padding:80px; align-items:center;">
+            <h3 style="color:white; margin-bottom:40px;">PROFILE</h3>
+            <div style="display:grid; grid-template-columns:repeat(2, 200px); gap:20px; margin-bottom:40px;">
+                <div style="background:#0a0a0a; border:1px solid #111; padding:30px; border-radius:12px; text-align:center;">
+                    <div style="font-size:3rem; color:white;" id="st-xp">0</div><div style="font-size:0.6rem; color:#444;">TOTAL XP</div>
+                </div>
+                <div style="background:#0a0a0a; border:1px solid #111; padding:30px; border-radius:12px; text-align:center;">
+                    <div style="font-size:3rem; color:var(--star);" id="st-pres">0</div><div style="font-size:0.6rem; color:#444;">STARS</div>
+                </div>
+            </div>
+            <div id="my-tags-ui" style="display:flex; gap:10px; margin-bottom:20px;"></div>
+            <button id="prestige-btn" onclick="doPrestige()" style="padding:15px 40px; background:var(--star); color:black; font-weight:800; border:none; display:none;">ASCEND TO PRESTIGE</button>
         </div>
 
         <div id="messages-view" class="view">
             <div id="chat-history"></div>
-            <div style="padding:30px 40px; border-top:1px solid var(--border); display:flex; gap:15px;">
-                <input type="text" id="chat-in" style="flex:1; background:0; border:0; color:white;" placeholder="Type a message...">
-                <button id="chat-send" style="background:0; border:0; color:var(--accent); font-weight:600; cursor:pointer;">SEND</button>
+            <div style="padding:30px; border-top:1px solid var(--border); display:flex; gap:15px;">
+                <input type="text" id="chat-in" style="flex:1; background:0; border:0; color:white;" placeholder="Message...">
+                <button id="chat-send" style="background:0; border:0; color:var(--accent); font-weight:600;">SEND</button>
             </div>
         </div>
 
-        <div id="leaderboard-view" class="view" style="padding:80px;">
-            <h3 style="color:white; margin-bottom:30px; font-weight:400;">GLOBAL RANKINGS</h3>
-            <div id="leaderboard-list" style="background:#0a0a0a; border:1px solid #111; border-radius:8px; overflow:hidden;"></div>
-        </div>
-
-        <div id="store-view" class="view" style="padding:80px;">
-            <h3 style="color:white; margin-bottom:30px; font-weight:400;">MARKET</h3>
-            <div id="market-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:15px;"></div>
-        </div>
+        <div id="leaderboard-view" class="view" style="padding:80px;"><div id="leader-list"></div></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getDatabase, ref, push, set, onChildAdded, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { getFirestore, doc, onSnapshot, collection, query, where, addDoc, updateDoc, getDocs, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI",
-            authDomain: "infnotes.firebaseapp.com",
-            projectId: "infnotes",
-            databaseURL: "https://infnotes-default-rtdb.asia-southeast1.firebasedatabase.app/",
-            storageBucket: "infnotes.firebasestorage.app",
-            messagingSenderId: "976520833702",
-            appId: "1:976520833702:web:ce8aa0afc1a6131da7e267"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI", authDomain: "infnotes.firebaseapp.com", projectId: "infnotes", databaseURL: "https://infnotes-default-rtdb.asia-southeast1.firebasedatabase.app/", appId: "1:976520833702:web:ce8aa0afc1a6131da7e267" };
+        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), rtd = getDatabase(app);
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const rtd = getDatabase(app);
+        let user, myData = {}, allNotes = [], allCards = [], activeDeck = [], curIdx = 0;
 
-        let currentUser, currentNoteId, allNotes = [], myData = {}, presenceList = {}, allCards = [], activeDeck = [], curIdx = 0, currentDeckName = "", editingId = null;
-
-        onAuthStateChanged(auth, u => {
-            if (u) {
-                currentUser = u;
-                document.getElementById('auth-overlay').style.display = 'none';
-                init();
-            }
-        });
-
-        document.getElementById('login-btn').onclick = async () => {
+        onAuthStateChanged(auth, u => { if(u) { user = u; document.getElementById('auth-overlay').style.display='none'; init(); } });
+        document.getElementById('login-btn').onclick = () => {
             const e = document.getElementById('email').value, p = document.getElementById('pass').value;
-            try { await signInWithEmailAndPassword(auth, e, p); } catch { await createUserWithEmailAndPassword(auth, e, p); }
+            signInWithEmailAndPassword(auth,e,p).catch(()=>createUserWithEmailAndPassword(auth,e,p));
         };
+
+        function calculateLevel(xp) {
+            let level = 1, req = 100;
+            while(xp >= req) { xp -= req; req *= 1.1; level++; }
+            return { level, progress: (xp/req)*100 };
+        }
 
         async function init() {
-            onSnapshot(doc(db, "users", currentUser.uid), snap => {
-                myData = snap.data() || { credits: 0, prestige: 0, wordCount: 0 };
-                updateUI();
+            onSnapshot(doc(db, "users", user.uid), snap => {
+                myData = snap.data() || { wordCount: 0, prestige: 0, credits: 0, tags: [] };
+                const { level, progress } = calculateLevel(myData.wordCount);
+                document.getElementById('lvl-txt').innerText = `LVL ${level}`;
+                document.getElementById('xp-fill').style.width = progress + "%";
+                document.getElementById('stars-txt').innerText = "★".repeat(myData.prestige);
+                document.getElementById('creds-txt').innerText = `$${myData.credits || 0} CREDITS`;
+                document.getElementById('st-xp').innerText = Math.floor(myData.wordCount);
+                document.getElementById('st-pres').innerText = myData.prestige;
+                document.getElementById('prestige-btn').style.display = level >= 50 ? 'block' : 'none';
+                
+                const tagUI = document.getElementById('my-tags-ui'); tagUI.innerHTML = '';
+                (myData.tags || []).forEach(t => tagUI.innerHTML += `<span class="tag-badge" style="background:#333; color:white;">${t}</span>`);
             });
 
-            onSnapshot(query(collection(db, "notes"), where("access", "array-contains", currentUser.uid)), snap => {
-                allNotes = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                renderSidebar();
+            onSnapshot(query(collection(db, "notes"), where("access", "array-contains", user.uid)), s => {
+                allNotes = s.docs.map(d => ({id:d.id, ...d.data()})); renderSidebar();
             });
 
-            onSnapshot(query(collection(db, "cards"), where("owner", "==", currentUser.uid)), snap => {
-                allCards = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                renderDecks();
-                if(currentDeckName) activeDeck = allCards.filter(c => c.deck === currentDeckName);
+            onSnapshot(query(collection(db, "cards"), where("owner", "==", user.uid)), s => {
+                allCards = s.docs.map(d => ({id:d.id, ...d.data()})); renderDecks();
             });
 
-            onValue(ref(rtd, 'online'), snap => { presenceList = snap.val() || {}; renderUserList(); });
-
-            onChildAdded(ref(rtd, 'messages'), snap => {
-                const m = snap.val();
-                const cont = document.createElement('div');
-                cont.className = `msg-container ${m.uid === currentUser.uid ? 'own' : ''}`;
-                cont.innerHTML = `
-                    <div class="msg-info">${m.sender} ${m.tag ? `<span class="tag-badge">${m.tag}</span>` : ''} ${"★".repeat(m.pres || 0)}</div>
-                    <div class="msg-bubble" style="--u-color: ${m.color || '#a29bfe'}">${m.text}</div>
-                `;
-                document.getElementById('chat-history').appendChild(cont);
-                document.getElementById('chat-history').scrollTop = 99999;
+            onChildAdded(ref(rtd, 'messages'), s => {
+                const m = s.val(), c = document.createElement('div');
+                c.innerHTML = `<div style="font-size:0.6rem; color:#444;">${m.sender} ${m.tag ? '['+m.tag+']' : ''}</div><div class="msg-bubble">${m.text}</div>`;
+                document.getElementById('chat-history').appendChild(c);
+                document.getElementById('chat-history').scrollTop = 9999;
             });
         }
 
-        /* UI & XP */
-        function updateUI() {
-            const lvl = Math.floor(myData.wordCount / 100) + 1;
-            document.getElementById('my-lvl-text').innerText = `LVL ${lvl}`;
-            document.getElementById('xp-fill').style.width = (myData.wordCount % 100) + "%";
-            document.getElementById('my-creds').innerText = `$${myData.credits || 0}`;
-            document.getElementById('my-stars').innerText = "★".repeat(myData.prestige || 0);
-        }
-
-        /* NOTES LOGIC */
+        /* NOTES & COLLAB */
         window.renderSidebar = () => {
             const root = document.getElementById('folder-root'); root.innerHTML = '';
-            const folders = [...new Set(allNotes.map(n => n.folder || 'DRAFTS'))];
-            folders.forEach(f => {
-                const g = document.createElement('div');
-                g.innerHTML = `<div class="nav-label">${f}</div><div id="f-${f}"></div>`;
-                root.appendChild(g);
-                allNotes.filter(n => (n.folder || 'DRAFTS') === f).forEach(n => {
-                    const i = document.createElement('div');
-                    i.className = `nav-item ${currentNoteId === n.id ? 'active' : ''}`;
-                    i.innerText = n.title;
-                    i.onclick = () => { 
-                        currentNoteId = n.id; 
-                        document.getElementById('note-title').value = n.title; 
-                        document.getElementById('rich-editor').innerHTML = n.content; 
-                        showView('notes-view', i);
-                    };
-                    document.getElementById(`f-${f}`).appendChild(i);
-                });
+            allNotes.forEach(n => {
+                const i = document.createElement('div'); i.className = 'nav-item'; i.innerText = n.title;
+                i.onclick = () => { window.curNoteId = n.id; document.getElementById('note-title').value = n.title; document.getElementById('rich-editor').innerHTML = n.content; showView('notes-view', i); };
+                root.appendChild(i);
             });
         };
-
-        window.createNewNote = async () => {
-            const f = prompt("FOLDER NAME?");
-            await addDoc(collection(db, "notes"), { title: "Untitled", content: "", folder: (f || "DRAFTS").toUpperCase(), access: [currentUser.uid], owner: currentUser.uid });
-        };
-
+        window.createNewNote = async () => await addDoc(collection(db, "notes"), { title: "New Note", content: "", access: [user.uid], owner: user.uid });
         document.getElementById('rich-editor').oninput = () => {
-            if (currentNoteId) updateDoc(doc(db, "notes", currentNoteId), { 
-                content: document.getElementById('rich-editor').innerHTML, 
-                title: document.getElementById('note-title').value 
-            });
+            if(window.curNoteId) updateDoc(doc(db, "notes", window.curNoteId), { content: document.getElementById('rich-editor').innerHTML, title: document.getElementById('note-title').value, wordCount: document.getElementById('rich-editor').innerText.length });
+        };
+        window.openCollab = () => document.getElementById('collab-modal').style.display='flex';
+        window.closeModal = () => document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+        window.addCollab = async () => {
+            const id = document.getElementById('collab-email').value;
+            if(window.curNoteId && id) { await updateDoc(doc(db, "notes", window.curNoteId), { access: arrayUnion(id) }); closeModal(); }
         };
 
-        /* FLASHCARD LOGIC */
-        window.createNewDeck = () => { const n = prompt("DECK NAME?"); if(n) startStudy(n.toUpperCase()); };
-        
+        /* MARKET */
+        window.buyTag = async (tag, cost) => {
+            if((myData.credits || 0) >= cost) {
+                await updateDoc(doc(db, "users", user.uid), { credits: myData.credits - cost, tags: arrayUnion(tag) });
+                alert("Purchased " + tag);
+            } else { alert("Not enough credits!"); }
+        };
+
+        /* FLASHCARDS */
         window.renderDecks = () => {
-            const grid = document.getElementById('deck-grid'); grid.innerHTML = '';
-            const names = [...new Set(allCards.map(c => c.deck))];
-            names.forEach(n => {
-                const count = allCards.filter(c => c.deck === n).length;
-                const div = document.createElement('div');
-                div.className = 'deck-card';
-                div.innerHTML = `
-                    <div style="color:white; font-size:0.9rem;">${n}</div>
-                    <div style="font-size:0.6rem; color:var(--accent); margin-top:5px;">${count} CARDS</div>
-                    <div style="margin-top:10px; display:flex; gap:10px; justify-content:center;">
-                        <span onclick="event.stopPropagation(); renameDeck('${n}')" style="font-size:0.5rem; opacity:0.3;">EDIT</span>
-                        <span onclick="event.stopPropagation(); deleteDeck('${n}')" style="font-size:0.5rem; color:#633;">DEL</span>
-                    </div>`;
-                div.onclick = () => startStudy(n);
-                grid.appendChild(div);
+            const g = document.getElementById('deck-grid'); g.innerHTML = '';
+            [...new Set(allCards.map(c => c.deck || 'GENERAL'))].forEach(n => {
+                const d = document.createElement('div'); d.className = 'nav-item'; d.style = "background:#111; padding:20px; height:100px;";
+                d.innerHTML = `<div>${n}</div>`;
+                d.onclick = () => { activeDeck = allCards.filter(c=>(c.deck||'GENERAL')===n); curIdx=0; 
+                    document.getElementById('deck-list-ui').style.display='none'; document.getElementById('study-ui').style.display='block'; showCard(); };
+                g.appendChild(d);
             });
         };
-
-        window.startStudy = (name) => {
-            currentDeckName = name;
-            activeDeck = allCards.filter(c => c.deck === name);
-            curIdx = 0;
-            document.getElementById('deck-list-ui').style.display = 'none';
-            document.getElementById('study-ui').style.display = 'block';
-            document.getElementById('active-deck-name').innerText = name;
-            showCard();
-        };
-
         function showCard() {
-            if(activeDeck.length === 0) {
-                document.getElementById('card-q').innerText = "EMPTY";
-                document.getElementById('card-a').innerText = "ADD CARDS";
-                return;
-            }
-            if(curIdx >= activeDeck.length) { exitDeck(); return; }
+            if(!activeDeck[curIdx]) { exitDeck(); return; }
             document.getElementById('card-q').innerText = activeDeck[curIdx].q;
             document.getElementById('card-a').innerText = activeDeck[curIdx].a;
             document.querySelector('.card-inner').classList.remove('flipped');
         }
+        window.deferCard = () => { activeDeck.push(activeDeck.splice(curIdx, 1)[0]); showCard(); };
+        window.nextCard = async (m) => { if(m) await updateDoc(doc(db, "users", user.uid), { wordCount: myData.wordCount + 5, credits: (myData.credits||0) + 2 }); curIdx++; showCard(); };
+        window.exitDeck = () => { document.getElementById('deck-list-ui').style.display='block'; document.getElementById('study-ui').style.display='none'; };
 
-        window.deferCard = () => {
-            if(activeDeck.length < 2) return;
-            const card = activeDeck.splice(curIdx, 1)[0];
-            activeDeck.push(card);
-            showCard();
-        };
-
-        window.nextCard = async (mastered) => {
-            if(mastered) await updateDoc(doc(db, "users", currentUser.uid), { wordCount: (myData.wordCount || 0) + 5 });
-            curIdx++; showCard();
-        };
-
-        window.exitDeck = () => {
-            document.getElementById('deck-list-ui').style.display = 'block';
-            document.getElementById('study-ui').style.display = 'none';
-            currentDeckName = "";
-        };
-
-        /* FLASHCARD CRUD */
-        window.openCardModal = () => {
-            editingId = null;
-            document.getElementById('target-deck-label').innerText = currentDeckName;
-            document.getElementById('q-in').value = ''; document.getElementById('a-in').value = '';
-            document.getElementById('card-modal').style.display = 'flex';
-        };
-
-        window.saveNewCard = async () => {
-            const q = document.getElementById('q-in').value, a = document.getElementById('a-in').value;
-            if(q && a) {
-                if(editingId) await updateDoc(doc(db, "cards", editingId), { q, a });
-                else await addDoc(collection(db, "cards"), { q, a, deck: currentDeckName, owner: currentUser.uid });
-                closeModal();
-            }
-        };
-
-        window.closeModal = () => { document.getElementById('card-modal').style.display = 'none'; };
-
-        window.editCurrentCard = () => {
-            const c = activeDeck[curIdx]; if(!c) return;
-            editingId = c.id;
-            document.getElementById('q-in').value = c.q; document.getElementById('a-in').value = c.a;
-            document.getElementById('card-modal').style.display = 'flex';
-        };
-
-        window.deleteCurrentCard = async () => {
-            const c = activeDeck[curIdx];
-            if(c && confirm("DELETE?")) { await deleteDoc(doc(db, "cards", c.id)); showCard(); }
-        };
-
-        window.renameDeck = async (old) => {
-            const n = prompt("NEW NAME?", old);
-            if(n && n !== old) {
-                const targets = allCards.filter(c => c.deck === old);
-                for(let c of targets) await updateDoc(doc(db, "cards", c.id), { deck: n.toUpperCase() });
-            }
-        };
-
-        window.deleteDeck = async (n) => {
-            if(confirm(`DELETE DECK ${n}?`)) {
-                const targets = allCards.filter(c => c.deck === n);
-                for(let c of targets) await deleteDoc(doc(db, "cards", c.id));
-            }
-        };
-
-        /* LEADERBOARD & CHAT */
-        window.renderLeaderboard = async (btn) => {
+        /* CORE */
+        window.doPrestige = async () => { await updateDoc(doc(db, "users", user.uid), { wordCount: 0, prestige: (myData.prestige||0)+1 }); };
+        window.loadLeaderboard = async (btn) => {
             showView('leaderboard-view', btn);
-            const list = document.getElementById('leaderboard-list');
-            const q = query(collection(db, "users"), orderBy("prestige", "desc"), orderBy("wordCount", "desc"));
-            const snap = await getDocs(q);
-            list.innerHTML = '';
-            let r = 1;
-            snap.forEach(d => {
-                const u = d.data();
-                list.innerHTML += `
-                    <div class="leader-row">
-                        <span>${r++}. ${u.email.split('@')[0].toUpperCase()} ${"★".repeat(u.prestige || 0)}</span>
-                        <span style="color:var(--xp)">${u.wordCount} XP</span>
-                    </div>`;
-            });
+            const s = await getDocs(query(collection(db, "users"), orderBy("prestige", "desc"), orderBy("wordCount", "desc")));
+            const l = document.getElementById('leader-list'); l.innerHTML = '<h3 style="color:white; margin-bottom:20px;">RANKINGS</h3>';
+            s.forEach((d, i) => { const u = d.data(); l.innerHTML += `<div style="padding:15px; border-bottom:1px solid #111; display:flex; justify-content:space-between;"><span>${i+1}. ${u.email.split('@')[0]}</span><span>${Math.floor(u.wordCount)} XP</span></div>`; });
         };
-
-        document.getElementById('chat-send').onclick = () => {
-            const t = document.getElementById('chat-in').value;
-            if(t) push(ref(rtd, 'messages'), { 
-                uid: currentUser.uid, sender: currentUser.email.split('@')[0], 
-                text: t, color: myData.color, tag: myData.tag, pres: myData.prestige 
-            });
-            document.getElementById('chat-in').value = '';
-        };
-
-        /* VIEW TOGGLE */
         window.showView = (id, btn) => {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             if(btn) btn.classList.add('active');
         };
-
-        window.renderUserList = async () => {
-            const root = document.getElementById('user-root'); root.innerHTML = '';
-            const snap = await getDocs(collection(db, "users"));
-            snap.forEach(d => {
-                const u = d.data();
-                const item = document.createElement('div');
-                item.className = 'nav-item';
-                const isOnline = presenceList[u.uid] ? 'style="color:var(--online)"' : '';
-                item.innerHTML = `<span ${isOnline}>${u.email.split('@')[0].toUpperCase()}</span> <span style="color:var(--star)">${"★".repeat(u.prestige || 0)}</span>`;
-                root.appendChild(item);
-            });
+        document.getElementById('chat-send').onclick = () => {
+            const t = document.getElementById('chat-in').value;
+            if(t) push(ref(rtd, 'messages'), { uid: user.uid, sender: user.email.split('@')[0], text: t, tag: (myData.tags||[])[0] });
+            document.getElementById('chat-in').value = '';
         };
     </script>
 </body>
