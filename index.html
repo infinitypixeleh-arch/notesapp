@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfNotes | Search & Sync</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a; --panel: #161616; --accent: #bb86fc;
+            --text: #e0e0e0; --text-dim: #888; --border: #2a2a2a;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
+        
+        #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .auth-card { background: var(--panel); padding: 40px; border-radius: 16px; border: 1px solid var(--border); text-align: center; width: 340px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--border); background: #000; color: white; outline: none; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--accent); color: #000; cursor: pointer; font-weight: 600; margin-top: 10px; }
+
+        .app-container { display: none; width: 100%; height: 100%; }
+        aside { width: 260px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; }
+        
+        /* Search & List Pane */
+        .list-view { width: 320px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: #0f0f0f; }
+        .list-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        #search-input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); border-radius: 6px; color: white; font-size: 0.9rem; }
+        .notes-scroll { flex: 1; overflow-y: auto; padding: 20px; }
+
+        main { flex: 1; display: flex; flex-direction: column; padding: 40px; position: relative; }
+
+        .color-picker { display: flex; gap: 8px; margin-bottom: 20px; }
+        .color-dot { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .color-dot.active { border-color: white; transform: scale(1.2); }
+
+        .note-card { padding: 15px; border-radius: 10px; margin-bottom: 12px; background: var(--panel); border: 1px solid var(--border); cursor: pointer; border-left: 5px solid transparent; }
+        .note-card.active { background: #1f1f1f; border-color: var(--accent); }
+
+        #note-title { font-size: 2.5rem; background: transparent; border: none; color: white; outline: none; width: 100%; }
+        #editor { flex: 1; background: transparent; border: none; color: var(--text); font-size: 1.1rem; resize: none; outline: none; line-height: 1.8; margin-top: 20px; }
+        #save-status { position: absolute; top: 15px; right: 20px; font-size: 0.8rem; color: var(--text-dim); }
+
+        .pomodoro { margin-top: auto; padding: 20px; background: #000; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        #timer { font-size: 2rem; font-weight: 300; margin-bottom: 10px; display: block; }
+        
+        .todo-section { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px; height: 150px; overflow-y: auto; }
+        .todo-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <h2 style="color: var(--accent)">InfNotes</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="pass" placeholder="Password">
+            <button id="login-btn">Enter Workspace</button>
+        </div>
+    </div>
+
+    <div class="app-container" id="app">
+        <aside>
+            <div style="font-weight: 600; font-size: 1.2rem; margin-bottom: 30px;">InfNotes.io</div>
+            <div class="pomodoro">
+                <span id="timer">25:00</span>
+                <button id="pomo-btn">Start Focus</button>
+            </div>
+            <button onclick="auth.signOut()" style="background:transparent; color:var(--text-dim); border:1px solid var(--border); margin-top:20px;">Logout</button>
+        </aside>
+
+        <section class="list-view">
+            <div class="list-header">
+                <button id="new-note-btn" style="width:100%; background:#222; color:white; margin-bottom:15px;">+ New Note</button>
+                <input type="text" id="search-input" placeholder="Search notes...">
+            </div>
+            <div class="notes-scroll" id="notes-grid"></div>
+        </section>
+
+        <main>
+            <div id="save-status">Ready</div>
+            <div class="color-picker">
+                <div class="color-dot" style="background:#bb86fc" data-color="#bb86fc"></div>
+                <div class="color-dot" style="background:#03dac6" data-color="#03dac6"></div>
+                <div class="color-dot" style="background:#ffb74d" data-color="#ffb74d"></div>
+                <div class="color-dot" style="background:#cf6679" data-color="#cf6679"></div>
+            </div>
+            <input type="text" id="note-title" placeholder="Untitled">
+            <textarea id="editor" placeholder="Start typing..."></textarea>
+            
+            <div class="todo-section">
+                <input type="text" id="todo-input" placeholder="Add a task..." style="background:transparent; border:none; border-bottom:1px solid var(--border); width:100%; margin-bottom:10px;">
+                <div id="todo-list"></div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, query, where, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI",
+            authDomain: "infnotes.firebaseapp.com",
+            projectId: "infnotes",
+            storageBucket: "infnotes.firebasestorage.app",
+            messagingSenderId: "976520833702",
+            appId: "1:976520833702:web:ce8aa0afc1a6131da7e267"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null, currentNoteId = null, selectedColor = "#bb86fc", allNotes = [];
+
+        // --- AUTH ---
+        document.getElementById('login-btn').onclick = async () => {
+            const email = document.getElementById('email').value, pass = document.getElementById('pass').value;
+            try { await signInWithEmailAndPassword(auth, email, pass); } 
+            catch { await createUserWithEmailAndPassword(auth, email, pass); }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { currentUser = user; document.getElementById('auth-overlay').style.display='none'; document.getElementById('app').style.display='flex'; loadNotes(); }
+            else { document.getElementById('auth-overlay').style.display='flex'; document.getElementById('app').style.none; }
+        });
+
+        // --- NOTES LOGIC ---
+        const loadNotes = () => {
+            const q = query(collection(db, "notes"), where("uid", "==", currentUser.uid));
+            onSnapshot(q, (snap) => {
+                allNotes = [];
+                snap.forEach(d => allNotes.push({ id: d.id, ...d.data() }));
+                renderNotes(allNotes);
+            });
+        };
+
+        const renderNotes = (notesArray) => {
+            const grid = document.getElementById('notes-grid');
+            grid.innerHTML = '';
+            notesArray.forEach(data => {
+                const card = document.createElement('div');
+                card.className = `note-card ${data.id === currentNoteId ? 'active' : ''}`;
+                card.style.borderLeftColor = data.color || '#bb86fc';
+                card.innerHTML = `<strong>${data.title || 'Untitled'}</strong><br><small>${data.content.substring(0,25)}...</small>`;
+                card.onclick = () => {
+                    currentNoteId = data.id;
+                    document.getElementById('note-title').value = data.title;
+                    document.getElementById('editor').value = data.content;
+                    selectedColor = data.color || "#bb86fc";
+                    renderNotes(allNotes); 
+                };
+                grid.appendChild(card);
+            });
+        };
+
+        // --- SEARCH LOGIC ---
+        document.getElementById('search-input').oninput = (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allNotes.filter(n => 
+                n.title.toLowerCase().includes(term) || 
+                n.content.toLowerCase().includes(term)
+            );
+            renderNotes(filtered);
+        };
+
+        document.getElementById('new-note-btn').onclick = async () => {
+            const docRef = await addDoc(collection(db, "notes"), {
+                uid: currentUser.uid, title: "", content: "", color: "#bb86fc", updatedAt: serverTimestamp()
+            });
+            currentNoteId = docRef.id;
+        };
+
+        // --- AUTOSAVE ---
+        let saveTimeout;
+        const autoSave = () => {
+            if (!currentNoteId) return;
+            document.getElementById('save-status').innerText = "Saving...";
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                await setDoc(doc(db, "notes", currentNoteId), {
+                    title: document.getElementById('note-title').value,
+                    content: document.getElementById('editor').value,
+                    color: selectedColor,
+                    uid: currentUser.uid,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+                document.getElementById('save-status').innerText = "Cloud Synced";
+            }, 800);
+        };
+
+        document.getElementById('note-title').oninput = autoSave;
+        document.getElementById('editor').oninput = autoSave;
+
+        // --- TIMER ---
+        let timeLeft = 1500, timerRunning = false;
+        document.getElementById('pomo-btn').onclick = function() {
+            timerRunning = !timerRunning;
+            this.innerText = timerRunning ? "Pause" : "Start";
+        };
+        setInterval(() => {
+            if (timerRunning && timeLeft > 0) {
+                timeLeft--;
+                const m = Math.floor(timeLeft/60), s = timeLeft%60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            }
+        }, 1000);
+
+        // --- TASKS ---
+        document.getElementById('todo-input').onkeypress = (e) => {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                const div = document.createElement('div');
+                div.className = 'todo-item';
+                div.innerHTML = `<input type="checkbox"> <span>${e.target.value}</span>`;
+                document.getElementById('todo-list').prepend(div);
+                e.target.value = '';
+            }
+        };
+    </script>
+</body>
+</html>
