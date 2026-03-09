@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INFNOTES // OMNI</title>
+    <title>InfNotes</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -39,9 +39,6 @@
         
         .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 30px; }
         .store-card { background: #0a0a0a; border: 1px solid #151515; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; }
-        
-        .indicator { width: 6px; height: 6px; border-radius: 50%; background: #222; display: inline-block; margin-right: 5px; }
-        .indicator.online { background: var(--online); box-shadow: 0 0 5px var(--online); }
     </style>
 </head>
 <body>
@@ -51,7 +48,7 @@
             <h1 style="letter-spacing:5px; color:white; font-weight:400;">INFNOTES</h1>
             <input type="email" id="email" placeholder="Email" style="width:100%; padding:12px; margin-bottom:10px; background:transparent; border:1px solid #151515; color:white;">
             <input type="password" id="pass" placeholder="Password" style="width:100%; padding:12px; margin-bottom:20px; background:transparent; border:1px solid #151515; color:white;">
-            <button id="login-btn" style="width:100%; padding:12px; background:white; color:black; border:none; cursor:pointer; font-weight:600;">ENTER</button>
+            <button id="login-btn" style="width:100%; padding:12px; background:white; color:black; border:none; cursor:pointer;">ENTER</button>
         </div>
     </div>
 
@@ -69,58 +66,48 @@
         <div class="nav-item" onclick="showView('messages-view', this)">Chat</div>
         <div class="nav-item" onclick="renderLeaderboard(this)">Leaderboard</div>
         <div class="nav-item" onclick="showView('store-view', this)">Market</div>
-        <div class="nav-item" onclick="showMyStats(this)">Profile</div>
+        <div class="nav-item" onclick="showMyProfile(this)">Profile</div>
 
         <div class="nav-label">Files</div>
         <div id="folder-root"></div>
         <button onclick="createNewNote()" style="margin-top:20px; background:transparent; color:#444; border:1px solid #151515; padding:10px; cursor:pointer; font-size:0.7rem;">+ NEW NOTE</button>
-
-        <div class="nav-label">Squad</div>
-        <div id="user-root"></div>
     </aside>
 
     <div class="view-container">
         <div id="notes-view" class="view active">
-            <div style="position:absolute; top:30px; right:60px; display:flex; gap:15px;">
-                <button onclick="shareNote()" style="color:var(--accent); background:transparent; border:none; cursor:pointer; font-size:0.7rem;">SHARE</button>
-                <button onclick="deleteNote()" style="color:#633; background:transparent; border:none; cursor:pointer; font-size:0.7rem;">DELETE</button>
-            </div>
             <input type="text" id="note-title" placeholder="Untitled">
             <div id="rich-editor" contenteditable="true"></div>
         </div>
 
         <div id="leaderboard-view" class="view" style="padding:100px;">
-            <h3 style="color:white; font-weight:400;">GLOBAL LEADERBOARD</h3>
+            <h3 style="color:white; font-weight:400;">GLOBAL RANKINGS</h3>
             <div id="leaderboard-list"></div>
         </div>
 
         <div id="store-view" class="view" style="padding:100px;">
             <h3 style="color:white; font-weight:400;">MARKET</h3>
             <div style="color:var(--credits); font-size:0.8rem;">CREDITS: <span id="store-balance">$0</span></div>
-            
-            <div id="prestige-banner" style="display:none; margin-top:30px; padding:20px; border:1px solid #333; background:#0f0505;">
-                <div style="color:#ff7675; font-size:0.7rem; letter-spacing:2px;">MAX LEVEL REACHED</div>
-                <button onclick="prestigeNow()" style="margin-top:10px; color:white; background:#c0392b; border:none; padding:10px 20px; cursor:pointer;">ASCEND (PRESTIGE)</button>
+            <div id="prestige-banner" style="display:none; margin-top:20px; padding:15px; border:1px solid #333;">
+                <button onclick="prestigeNow()" style="background:#c0392b; color:white; border:none; padding:10px; cursor:pointer;">ASCEND (PRESTIGE)</button>
             </div>
-
             <div class="store-grid">
-                <div class="store-card" onclick="buyColor('#ff7675', 50)">
-                    <div style="width:15px; height:15px; background:#ff7675; margin:0 auto 10px; border-radius:50%;"></div>
-                    <div style="font-size:0.7rem;">ROSE CHAT</div>
-                    <div style="color:var(--credits); font-size:0.6rem;">$50</div>
-                </div>
-                <div class="store-card" onclick="buyColor('#55efc4', 50)">
-                    <div style="width:15px; height:15px; background:#55efc4; margin:0 auto 10px; border-radius:50%;"></div>
-                    <div style="font-size:0.7rem;">MINT CHAT</div>
-                    <div style="color:var(--credits); font-size:0.6rem;">$50</div>
-                </div>
+                <div class="store-card" onclick="buyColor('#ff7675', 50)">ROSE CHAT ($50)</div>
+                <div class="store-card" onclick="buyColor('#55efc4', 50)">MINT CHAT ($50)</div>
             </div>
+        </div>
+
+        <div id="profile-view" class="view" style="padding:100px;">
+            <h3 style="color:white; font-weight:400;">USER PROFILE</h3>
+            <div id="p-words" style="font-size:3rem; color:white; font-weight:300;">0</div>
+            <div style="font-size:0.7rem; color:var(--accent); letter-spacing:1px;">TOTAL WORDS</div>
+            <div id="p-prestige" style="margin-top:20px; color:#ff7675;">PRESTIGE: 0</div>
+            <div id="p-stars" class="star-rank" style="font-size:1.5rem; margin-top:10px;"></div>
         </div>
 
         <div id="messages-view" class="view">
             <div id="chat-history"></div>
             <div style="padding:30px 50px; border-top:1px solid var(--border); display:flex; gap:20px;">
-                <input type="text" id="chat-in" style="flex:1; background:transparent; border:none; color:white;" placeholder="Broadcast to team...">
+                <input type="text" id="chat-in" style="flex:1; background:transparent; border:none; color:white;" placeholder="Message...">
                 <button id="chat-send" style="background:transparent; border:none; color:var(--accent); cursor:pointer;">SEND</button>
             </div>
         </div>
@@ -130,7 +117,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getDatabase, ref, push, set, onChildAdded, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI",
@@ -147,17 +134,15 @@
         const db = getFirestore(app);
         const rtd = getDatabase(app);
 
-        let currentUser = null, currentNoteId = null, allNotes = [], myData = {}, presenceList = {};
+        let currentUser = null, currentNoteId = null, allNotes = [], myData = {};
 
         onAuthStateChanged(auth, async (u) => {
             if (u) {
                 currentUser = u;
                 onSnapshot(doc(db, "users", u.uid), (snap) => {
-                    myData = snap.data() || { credits: 0, prestige: 0, wordCount: 0, color: '#a29bfe' };
+                    myData = snap.data() || { wordCount: 0, prestige: 0, credits: 0 };
                     updateUI();
                 });
-                set(ref(rtd, `online/${u.uid}`), true);
-                onDisconnect(ref(rtd, `online/${u.uid}`)).remove();
                 document.getElementById('auth-overlay').style.display = 'none';
                 init();
             }
@@ -175,48 +160,30 @@
         }
 
         async function init() {
-            // Notes & Folders
             onSnapshot(query(collection(db, "notes"), where("access", "array-contains", currentUser.uid)), (snap) => {
                 allNotes = []; snap.forEach(d => allNotes.push({id: d.id, ...d.data()}));
                 renderSidebar();
                 syncProgress();
             });
-
-            // Presence & Squad
-            onValue(ref(rtd, 'online'), (snap) => { presenceList = snap.val() || {}; renderUserList(); });
-
-            // Chat
             onChildAdded(ref(rtd, 'messages'), (snap) => {
                 const m = snap.val();
                 const div = document.createElement('div');
                 div.className = `msg-bubble ${m.uid === currentUser.uid ? 'own' : ''}`;
                 if (m.color) div.style.setProperty('--u-color', m.color);
-                const stars = "★".repeat(Math.min(5, m.prestige || 0));
-                div.innerHTML = `<div style="font-size:0.6rem; opacity:0.5;">${m.sender} <span class="star-rank">${stars}</span></div><div>${m.text}</div>`;
+                div.innerHTML = `<div style="font-size:0.6rem; opacity:0.5;">${m.sender} ${"★".repeat(m.prestige || 0)}</div><div>${m.text}</div>`;
                 document.getElementById('chat-history').appendChild(div);
-                document.getElementById('chat-history').scrollTop = 99999;
             });
         }
 
         async function syncProgress() {
-            let totalWords = 0;
-            allNotes.forEach(n => totalWords += (n.content || "").replace(/<[^>]*>/g, '').split(/\s+/).filter(x => x).length);
-            const stats = calculateLvl(totalWords);
-            
-            // Economy: +$10 per level up
+            let total = 0;
+            allNotes.forEach(n => total += (n.content || "").replace(/<[^>]*>/g, '').split(/\s+/).filter(x => x).length);
+            const stats = calculateLvl(total);
             let newCredits = myData.credits || 0;
-            if (stats.lvl > (myData.last_lvl || 1)) {
-                newCredits += (stats.lvl - (myData.last_lvl || 1)) * 10;
-            }
-
+            if (stats.lvl > (myData.last_lvl || 1)) newCredits += (stats.lvl - (myData.last_lvl || 1)) * 10;
+            
             await setDoc(doc(db, "users", currentUser.uid), {
-                email: currentUser.email,
-                uid: currentUser.uid,
-                wordCount: totalWords,
-                prestige: myData.prestige || 0,
-                credits: newCredits,
-                last_lvl: stats.lvl,
-                color: myData.color || '#a29bfe'
+                wordCount: total, last_lvl: stats.lvl, credits: newCredits, prestige: myData.prestige || 0, email: currentUser.email, uid: currentUser.uid
             }, { merge: true });
         }
 
@@ -224,40 +191,40 @@
             const stats = calculateLvl(myData.wordCount || 0);
             document.getElementById('my-lvl-text').innerText = `LVL ${stats.lvl}`;
             document.getElementById('xp-fill').style.width = stats.progress + "%";
-            document.getElementById('my-stars').innerText = "★".repeat(Math.min(5, myData.prestige || 0));
+            document.getElementById('my-stars').innerText = "★".repeat(myData.prestige || 0);
             document.getElementById('my-creds').innerText = `$${myData.credits || 0}`;
             document.getElementById('store-balance').innerText = `$${myData.credits || 0}`;
             document.getElementById('prestige-banner').style.display = stats.lvl >= 50 ? 'block' : 'none';
         }
 
+        window.showMyProfile = (btn) => {
+            showView('profile-view', btn);
+            document.getElementById('p-words').innerText = myData.wordCount || 0;
+            document.getElementById('p-prestige').innerText = `PRESTIGE: ${myData.prestige || 0}`;
+            document.getElementById('p-stars').innerText = "★".repeat(myData.prestige || 0);
+        };
+
         window.renderLeaderboard = async (btn) => {
             showView('leaderboard-view', btn);
-            const list = document.getElementById('leaderboard-list');
             const q = query(collection(db, "users"), orderBy("prestige", "desc"), orderBy("wordCount", "desc"));
             const snap = await getDocs(q);
+            const list = document.getElementById('leaderboard-list');
             list.innerHTML = '';
-            let r = 1;
             snap.forEach(d => {
                 const u = d.data();
                 const row = document.createElement('div');
                 row.className = 'leaderboard-row';
-                row.innerHTML = `<div style="width:20px; color:#333;">${r++}</div><div style="flex:1;">${u.email.split('@')[0].toUpperCase()} <span class="star-rank">${"★".repeat(u.prestige || 0)}</span></div><div style="color:var(--accent)">${u.wordCount} W</div>`;
+                row.innerHTML = `<div style="flex:1;">${u.email.split('@')[0]} ${"★".repeat(u.prestige || 0)}</div><div>${u.wordCount} W</div>`;
                 list.appendChild(row);
             });
         };
 
-        window.buyColor = async (color, cost) => {
-            if (myData.credits >= cost) {
-                await updateDoc(doc(db, "users", currentUser.uid), { color: color, credits: myData.credits - cost });
-            } else { alert("INSUFFICIENT CREDITS"); }
-        };
-
-        window.prestigeNow = async () => {
-            if (confirm("ASCEND? Resets words, gives 1 permanent Star.")) {
-                const q = query(collection(db, "notes"), where("owner", "==", currentUser.uid));
-                const snap = await getDocs(q);
-                for (const d of snap.docs) await deleteDoc(d.ref);
-                await updateDoc(doc(db, "users", currentUser.uid), { prestige: (myData.prestige || 0) + 1, wordCount: 0 });
+        window.showView = (id, btn) => {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(btn) {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                btn.classList.add('active');
             }
         };
 
@@ -272,38 +239,22 @@
                     const i = document.createElement('div');
                     i.className = `nav-item ${currentNoteId === n.id ? 'active' : ''}`;
                     i.innerText = n.title || 'Untitled';
-                    i.onclick = () => loadNote(n);
+                    i.onclick = () => { currentNoteId = n.id; document.getElementById('note-title').value = n.title; document.getElementById('rich-editor').innerHTML = n.content; showView('notes-view'); };
                     document.getElementById(`f-${f}`).appendChild(i);
                 });
             });
         }
 
-        function loadNote(n) {
-            currentNoteId = n.id;
-            document.getElementById('note-title').value = n.title;
-            document.getElementById('rich-editor').innerHTML = n.content;
-            showView('notes-view');
-        }
+        window.createNewNote = async () => {
+            const f = prompt("FOLDER?", "DRAFTS");
+            await addDoc(collection(db, "notes"), { title: "UNTITLED", content: "", folder: (f || "DRAFTS").toUpperCase(), access: [currentUser.uid], owner: currentUser.uid });
+        };
 
         document.getElementById('rich-editor').oninput = () => {
             if (currentNoteId) updateDoc(doc(db, "notes", currentNoteId), { 
                 content: document.getElementById('rich-editor').innerHTML, 
                 title: document.getElementById('note-title').value 
             });
-        };
-
-        window.createNewNote = async () => {
-            const f = prompt("FOLDER NAME?", "DRAFTS");
-            await addDoc(collection(db, "notes"), { title: "UNTITLED", content: "", folder: (f || "DRAFTS").toUpperCase(), access: [currentUser.uid], owner: currentUser.uid });
-        };
-
-        window.showView = (id, btn) => {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(btn) {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                btn.classList.add('active');
-            }
         };
 
         document.getElementById('chat-send').onclick = () => {
