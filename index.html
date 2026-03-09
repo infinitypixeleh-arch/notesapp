@@ -237,13 +237,23 @@ const getIDColor = (id) => {
 
             onSnapshot(collection(db, "market"), s => renderMarketNotes(s.docs.map(d => ({id:d.id, ...d.data()}))));
 
-            onChildAdded(ref(rtd, 'messages'), s => {
-                const m = s.val(), d = document.createElement('div');
-                d.className = `msg-bubble ${m.uid === currentUser.uid ? 'own' : ''}`;
-                d.innerHTML = `<div style="font-size:0.6rem; opacity:0.5;">${m.sender} ${m.tag?'['+m.tag+']':''} ${"★".repeat(m.pres||0)}</div><div>${m.text}</div>`;
-                document.getElementById('chat-history').appendChild(d);
-                document.getElementById('chat-history').scrollTop = 9999;
-            });
+           onChildAdded(ref(rtd, 'messages'), s => {
+    const m = s.val();
+    const userColor = getIDColor(m.uid);
+    const d = document.createElement('div');
+    
+    d.className = `msg-bubble ${m.uid === currentUser.uid ? 'own' : ''}`;
+    d.style.borderColor = userColor; // Adds the colored border
+    
+    d.innerHTML = `
+        <div style="font-size:0.6rem; color:${userColor}; margin-bottom:4px; font-weight:600;">
+            ${m.sender} ${"★".repeat(m.pres||0)}
+        </div>
+        <div>${m.text}</div>
+    `;
+    document.getElementById('chat-history').appendChild(d);
+    document.getElementById('chat-history').scrollTop = 9999;
+});
 
             renderStaticMarket();
         }
