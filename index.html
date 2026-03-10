@@ -1,267 +1,446 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InfNotes</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #050505; --panel: #0a0a0a; --accent: #a29bfe;
-            --text: #888; --text-focus: #e0e0e0; --border: #151515;
-            --sidebar-w: 240px; --online: #55efc4; --xp: #fdcb6e; 
-            --star: #f1c40f; --credits: #00d2d3;
-        }
-        * { box-sizing: border-box; outline: none; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
-        
-        aside { width: var(--sidebar-w); background: var(--panel); border-right: 1px solid var(--border); padding: 35px 20px; display: flex; flex-direction: column; overflow-y: auto; }
-        .nav-label { font-size: 0.6rem; color: #333; text-transform: uppercase; letter-spacing: 2px; margin: 25px 0 10px 10px; }
-        .nav-item { padding: 8px 10px; cursor: pointer; font-size: 0.75rem; border-radius: 4px; display: flex; justify-content: space-between; color: var(--text); align-items: center; }
-        .nav-item:hover, .nav-item.active { color: var(--text-focus); background: #111; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InfNotes</title>
 
-        .view-container { flex: 1; display: flex; background: var(--bg); position: relative; }
-        .view { display: none; width: 100%; height: 100%; flex-direction: column; overflow-y: auto; }
-        .view.active { display: flex; }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-        #rich-editor { flex: 1; padding: 20px 80px; font-size: 1rem; line-height: 1.8; color: #c0c0c0; outline: none; overflow-y: auto; }
-        #note-title { font-size: 2.2rem; background: transparent; border: none; color: var(--text-focus); padding: 60px 80px 10px 80px; font-weight: 600; }
+<style>
 
-        .leaderboard-row { display: flex; align-items: center; padding: 15px 40px; border-bottom: 1px solid #111; gap: 20px; font-size: 0.8rem; }
-        .star-rank { color: var(--star); letter-spacing: 2px; font-size: 0.7rem; }
+:root{
+--bg:#050505;
+--panel:#0a0a0a;
+--accent:#a29bfe;
+--text:#888;
+--text-focus:#e0e0e0;
+--border:#151515;
+--sidebar-w:240px;
+--xp:#fdcb6e;
+--credits:#00d2d3;
+}
 
-        #chat-history { flex: 1; overflow-y: auto; padding: 50px; font-size: 0.9rem; display: flex; flex-direction: column; gap: 15px; }
-        .msg-bubble { background: #111; padding: 12px 18px; border-radius: 8px; max-width: 70%; border: 1px solid #151515; color: #ccc; }
-        .msg-bubble.own { align-self: flex-end; border-color: var(--u-color, var(--accent)); }
+*{box-sizing:border-box}
 
-        .xp-bar-container { width: 100%; height: 3px; background: #111; margin-top: 8px; border-radius: 2px; overflow: hidden; }
-        #xp-fill { height: 100%; background: var(--xp); width: 0%; transition: width 0.4s ease; }
-        
-        .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 30px; }
-        .store-card { background: #0a0a0a; border: 1px solid #151515; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; }
-    </style>
+body{
+margin:0;
+background:var(--bg);
+color:var(--text);
+font-family:'Inter',sans-serif;
+height:100vh;
+display:flex;
+overflow:hidden;
+}
+
+aside{
+width:var(--sidebar-w);
+background:var(--panel);
+border-right:1px solid var(--border);
+padding:35px 20px;
+display:flex;
+flex-direction:column;
+overflow-y:auto;
+}
+
+.nav-item{
+padding:8px 10px;
+cursor:pointer;
+font-size:0.75rem;
+border-radius:4px;
+}
+
+.nav-item:hover{background:#111;color:white}
+
+.view-container{
+flex:1;
+display:flex;
+}
+
+.view{
+display:none;
+width:100%;
+height:100%;
+flex-direction:column;
+}
+
+.view.active{display:flex}
+
+#rich-editor{
+flex:1;
+padding:20px 80px;
+font-size:1rem;
+line-height:1.8;
+color:#c0c0c0;
+outline:none;
+overflow-y:auto;
+}
+
+.msg-bubble{
+background:#111;
+padding:12px 18px;
+border-radius:8px;
+max-width:70%;
+border:1px solid #151515;
+}
+
+.store-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+gap:15px;
+margin-top:30px;
+}
+
+.store-card{
+background:#0a0a0a;
+border:1px solid #151515;
+padding:20px;
+border-radius:8px;
+text-align:center;
+cursor:pointer;
+}
+
+.page-controls{
+position:fixed;
+bottom:20px;
+right:20px;
+display:flex;
+gap:10px;
+}
+
+</style>
 </head>
+
 <body>
 
-    <div id="auth-overlay" style="position:fixed; inset:0; background:var(--bg); z-index:5000; display:flex; align-items:center; justify-content:center;">
-        <div style="width:300px; text-align:center;">
-            <h1 style="letter-spacing:5px; color:white; font-weight:400;">INFNOTES</h1>
-            <input type="email" id="email" placeholder="Email" style="width:100%; padding:12px; margin-bottom:10px; background:transparent; border:1px solid #151515; color:white;">
-            <input type="password" id="pass" placeholder="Password" style="width:100%; padding:12px; margin-bottom:20px; background:transparent; border:1px solid #151515; color:white;">
-            <button id="login-btn" style="width:100%; padding:12px; background:white; color:black; border:none; cursor:pointer;">ENTER</button>
-        </div>
-    </div>
+<div id="auth-overlay" style="position:fixed;inset:0;background:#050505;display:flex;align-items:center;justify-content:center;z-index:5000">
+<div style="width:300px;text-align:center">
 
-    <aside>
-        <div id="my-rank-area" style="margin-bottom:30px;">
-            <div style="display:flex; justify-content:space-between; font-size:0.6rem;">
-                <span id="my-lvl-text">LVL 1</span>
-                <span id="my-stars" class="star-rank"></span>
-            </div>
-            <div class="xp-bar-container"><div id="xp-fill"></div></div>
-            <div id="my-creds" style="color:var(--credits); font-size:0.6rem; margin-top:5px;">$0</div>
-        </div>
+<h1>INFNOTES</h1>
 
-        <div class="nav-item active" onclick="showView('notes-view', this)">Notes</div>
-        <div class="nav-item" onclick="showView('messages-view', this)">Chat</div>
-        <div class="nav-item" onclick="renderLeaderboard(this)">Leaderboard</div>
-        <div class="nav-item" onclick="showView('store-view', this)">Market</div>
-        <div class="nav-item" onclick="showMyProfile(this)">Profile</div>
+<input id="email" placeholder="Email" style="width:100%;padding:12px;margin-bottom:10px">
 
-        <div class="nav-label">Files</div>
-        <div id="folder-root"></div>
-        <button onclick="createNewNote()" style="margin-top:20px; background:transparent; color:#444; border:1px solid #151515; padding:10px; cursor:pointer; font-size:0.7rem;">+ NEW NOTE</button>
-    </aside>
+<input id="pass" type="password" placeholder="Password" style="width:100%;padding:12px;margin-bottom:20px">
 
-    <div class="view-container">
-        <div id="notes-view" class="view active">
-            <input type="text" id="note-title" placeholder="Untitled">
-            <div id="rich-editor" contenteditable="true"></div>
-        </div>
+<button id="login-btn">ENTER</button>
 
-        <div id="leaderboard-view" class="view" style="padding:100px;">
-            <h3 style="color:white; font-weight:400;">GLOBAL RANKINGS</h3>
-            <div id="leaderboard-list"></div>
-        </div>
+</div>
+</div>
 
-        <div id="store-view" class="view" style="padding:100px;">
-            <h3 style="color:white; font-weight:400;">MARKET</h3>
-            <div style="color:var(--credits); font-size:0.8rem;">CREDITS: <span id="store-balance">$0</span></div>
-            <div id="prestige-banner" style="display:none; margin-top:20px; padding:15px; border:1px solid #333;">
-                <button onclick="prestigeNow()" style="background:#c0392b; color:white; border:none; padding:10px; cursor:pointer;">ASCEND (PRESTIGE)</button>
-            </div>
-            <div class="store-grid">
-                <div class="store-card" onclick="buyColor('#ff7675', 50)">ROSE CHAT ($50)</div>
-                <div class="store-card" onclick="buyColor('#55efc4', 50)">MINT CHAT ($50)</div>
-            </div>
-        </div>
+<aside>
 
-        <div id="profile-view" class="view" style="padding:100px;">
-            <h3 style="color:white; font-weight:400;">USER PROFILE</h3>
-            <div id="p-words" style="font-size:3rem; color:white; font-weight:300;">0</div>
-            <div style="font-size:0.7rem; color:var(--accent); letter-spacing:1px;">TOTAL WORDS</div>
-            <div id="p-prestige" style="margin-top:20px; color:#ff7675;">PRESTIGE: 0</div>
-            <div id="p-stars" class="star-rank" style="font-size:1.5rem; margin-top:10px;"></div>
-        </div>
+<div id="my-lvl-text">LVL 1</div>
+<div id="my-stars"></div>
+<div id="my-creds">$0</div>
 
-        <div id="messages-view" class="view">
-            <div id="chat-history"></div>
-            <div style="padding:30px 50px; border-top:1px solid var(--border); display:flex; gap:20px;">
-                <input type="text" id="chat-in" style="flex:1; background:transparent; border:none; color:white;" placeholder="Message...">
-                <button id="chat-send" style="background:transparent; border:none; color:var(--accent); cursor:pointer;">SEND</button>
-            </div>
-        </div>
-    </div>
+<div class="nav-item" onclick="showView('notes-view')">Notes</div>
+<div class="nav-item" onclick="showView('messages-view')">Chat</div>
+<div class="nav-item" onclick="renderLeaderboard()">Leaderboard</div>
+<div class="nav-item" onclick="showView('store-view')">Market</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+<div id="folder-root"></div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI",
-            authDomain: "infnotes.firebaseapp.com",
-            projectId: "infnotes",
-            databaseURL: "https://infnotes-default-rtdb.asia-southeast1.firebasedatabase.app/",
-            storageBucket: "infnotes.firebasestorage.app",
-            messagingSenderId: "976520833702",
-            appId: "1:976520833702:web:ce8aa0afc1a6131da7e267"
-        };
+<button onclick="createNewNote()">NEW NOTE</button>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const rtd = getDatabase(app);
+</aside>
 
-        let currentUser = null, currentNoteId = null, allNotes = [], myData = {};
+<div class="view-container">
 
-        onAuthStateChanged(auth, async (u) => {
-            if (u) {
-                currentUser = u;
-                onSnapshot(doc(db, "users", u.uid), (snap) => {
-                    myData = snap.data() || { wordCount: 0, prestige: 0, credits: 0 };
-                    updateUI();
-                });
-                document.getElementById('auth-overlay').style.display = 'none';
-                init();
-            }
-        });
+<div id="notes-view" class="view active">
 
-        document.getElementById('login-btn').onclick = async () => {
-            const e = document.getElementById('email').value, p = document.getElementById('pass').value;
-            try { await signInWithEmailAndPassword(auth, e, p); } catch { await createUserWithEmailAndPassword(auth, e, p); }
-        };
+<input id="note-title">
 
-        function calculateLvl(words) {
-            let lvl = 1, wordsNeeded = 100;
-            while (words >= wordsNeeded) { words -= wordsNeeded; wordsNeeded *= 1.1; lvl++; }
-            return { lvl, progress: (words / wordsNeeded) * 100 };
-        }
+<div id="rich-editor" contenteditable="true"></div>
 
-        async function init() {
-            onSnapshot(query(collection(db, "notes"), where("access", "array-contains", currentUser.uid)), (snap) => {
-                allNotes = []; snap.forEach(d => allNotes.push({id: d.id, ...d.data()}));
-                renderSidebar();
-                syncProgress();
-            });
-            onChildAdded(ref(rtd, 'messages'), (snap) => {
-                const m = snap.val();
-                const div = document.createElement('div');
-                div.className = `msg-bubble ${m.uid === currentUser.uid ? 'own' : ''}`;
-                if (m.color) div.style.setProperty('--u-color', m.color);
-                div.innerHTML = `<div style="font-size:0.6rem; opacity:0.5;">${m.sender} ${"★".repeat(m.prestige || 0)}</div><div>${m.text}</div>`;
-                document.getElementById('chat-history').appendChild(div);
-            });
-        }
+<button onclick="shareNote()">Share</button>
+<button onclick="summarizeNote()">Summarize</button>
 
-        async function syncProgress() {
-            let total = 0;
-            allNotes.forEach(n => total += (n.content || "").replace(/<[^>]*>/g, '').split(/\s+/).filter(x => x).length);
-            const stats = calculateLvl(total);
-            let newCredits = myData.credits || 0;
-            if (stats.lvl > (myData.last_lvl || 1)) newCredits += (stats.lvl - (myData.last_lvl || 1)) * 10;
-            
-            await setDoc(doc(db, "users", currentUser.uid), {
-                wordCount: total, last_lvl: stats.lvl, credits: newCredits, prestige: myData.prestige || 0, email: currentUser.email, uid: currentUser.uid
-            }, { merge: true });
-        }
+</div>
 
-        function updateUI() {
-            const stats = calculateLvl(myData.wordCount || 0);
-            document.getElementById('my-lvl-text').innerText = `LVL ${stats.lvl}`;
-            document.getElementById('xp-fill').style.width = stats.progress + "%";
-            document.getElementById('my-stars').innerText = "★".repeat(myData.prestige || 0);
-            document.getElementById('my-creds').innerText = `$${myData.credits || 0}`;
-            document.getElementById('store-balance').innerText = `$${myData.credits || 0}`;
-            document.getElementById('prestige-banner').style.display = stats.lvl >= 50 ? 'block' : 'none';
-        }
+<div id="messages-view" class="view">
 
-        window.showMyProfile = (btn) => {
-            showView('profile-view', btn);
-            document.getElementById('p-words').innerText = myData.wordCount || 0;
-            document.getElementById('p-prestige').innerText = `PRESTIGE: ${myData.prestige || 0}`;
-            document.getElementById('p-stars').innerText = "★".repeat(myData.prestige || 0);
-        };
+<div id="chat-history"></div>
 
-        window.renderLeaderboard = async (btn) => {
-            showView('leaderboard-view', btn);
-            const q = query(collection(db, "users"), orderBy("prestige", "desc"), orderBy("wordCount", "desc"));
-            const snap = await getDocs(q);
-            const list = document.getElementById('leaderboard-list');
-            list.innerHTML = '';
-            snap.forEach(d => {
-                const u = d.data();
-                const row = document.createElement('div');
-                row.className = 'leaderboard-row';
-                row.innerHTML = `<div style="flex:1;">${u.email.split('@')[0]} ${"★".repeat(u.prestige || 0)}</div><div>${u.wordCount} W</div>`;
-                list.appendChild(row);
-            });
-        };
+<input id="chat-in">
+<button id="chat-send">SEND</button>
 
-        window.showView = (id, btn) => {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(btn) {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                btn.classList.add('active');
-            }
-        };
+</div>
 
-        function renderSidebar() {
-            const root = document.getElementById('folder-root'); root.innerHTML = '';
-            const folders = [...new Set(allNotes.map(n => n.folder || 'DRAFTS'))];
-            folders.forEach(f => {
-                const g = document.createElement('div');
-                g.innerHTML = `<div class="nav-label">${f}</div><div id="f-${f}"></div>`;
-                root.appendChild(g);
-                allNotes.filter(n => (n.folder || 'DRAFTS') === f).forEach(n => {
-                    const i = document.createElement('div');
-                    i.className = `nav-item ${currentNoteId === n.id ? 'active' : ''}`;
-                    i.innerText = n.title || 'Untitled';
-                    i.onclick = () => { currentNoteId = n.id; document.getElementById('note-title').value = n.title; document.getElementById('rich-editor').innerHTML = n.content; showView('notes-view'); };
-                    document.getElementById(`f-${f}`).appendChild(i);
-                });
-            });
-        }
+<div id="leaderboard-view" class="view">
 
-        window.createNewNote = async () => {
-            const f = prompt("FOLDER?", "DRAFTS");
-            await addDoc(collection(db, "notes"), { title: "UNTITLED", content: "", folder: (f || "DRAFTS").toUpperCase(), access: [currentUser.uid], owner: currentUser.uid });
-        };
+<h3>GLOBAL WORD LEADERBOARD</h3>
+<div id="leaderboard-list"></div>
 
-        document.getElementById('rich-editor').oninput = () => {
-            if (currentNoteId) updateDoc(doc(db, "notes", currentNoteId), { 
-                content: document.getElementById('rich-editor').innerHTML, 
-                title: document.getElementById('note-title').value 
-            });
-        };
+</div>
 
-        document.getElementById('chat-send').onclick = () => {
-            const t = document.getElementById('chat-in').value;
-            if(t) push(ref(rtd, 'messages'), { uid: currentUser.uid, sender: currentUser.email.split('@')[0], text: t, prestige: myData.prestige || 0, color: myData.color });
-            document.getElementById('chat-in').value = '';
-        };
-    </script>
+<div id="store-view" class="view">
+
+<h3>RARITY STORE</h3>
+
+<div class="store-grid">
+
+<div class="store-card" onclick="buyColor('#ff7675',50)">ROSE</div>
+<div class="store-card" onclick="buyColor('#55efc4',50)">MINT</div>
+<div class="store-card" onclick="buyColor('#74b9ff',50)">SKY</div>
+
+<div class="store-card" onclick="buyTag('DEV',0)">DEV TAG</div>
+<div class="store-card" onclick="buyTag('PRO',100)">PRO</div>
+<div class="store-card" onclick="buyTag('ELITE',150)">ELITE</div>
+
+<div class="store-card" onclick="sellNotePages()">SELL PAGES</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="page-controls">
+<button onclick="prevPage()">Prev</button>
+<button onclick="nextPage()">Next</button>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"
+import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"
+import { getFirestore,doc,setDoc,collection,query,where,onSnapshot,addDoc,updateDoc,getDocs,orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"
+import { getDatabase,ref,push,onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"
+
+const firebaseConfig={
+apiKey:"AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI",
+authDomain:"infnotes.firebaseapp.com",
+projectId:"infnotes",
+databaseURL:"https://infnotes-default-rtdb.asia-southeast1.firebasedatabase.app/",
+storageBucket:"infnotes.firebasestorage.app",
+messagingSenderId:"976520833702",
+appId:"1:976520833702:web:ce8aa0afc1a6131da7e267"
+}
+
+const app=initializeApp(firebaseConfig)
+const auth=getAuth(app)
+const db=getFirestore(app)
+const rtd=getDatabase(app)
+
+let currentUser=null
+let myData={}
+
+onAuthStateChanged(auth,async u=>{
+if(u){
+
+currentUser=u
+
+document.getElementById("auth-overlay").style.display="none"
+
+onSnapshot(doc(db,"users",u.uid),(snap)=>{
+myData=snap.data()||{}
+})
+
+init()
+
+}
+})
+
+document.getElementById("login-btn").onclick=async()=>{
+
+const e=email.value
+const p=pass.value
+
+try{
+
+await signInWithEmailAndPassword(auth,e,p)
+
+}catch{
+
+await createUserWithEmailAndPassword(auth,e,p)
+
+}
+
+}
+
+function init(){
+
+onChildAdded(ref(rtd,'messages'),(snap)=>{
+
+const m=snap.val()
+
+const div=document.createElement("div")
+
+div.className="msg-bubble"
+
+div.innerHTML=
+(m.tag? "["+m.tag+"] ":"")+
+m.sender+
+" "+("★".repeat(m.prestige||0))+
+"<br>"+m.text
+
+chat-history.appendChild(div)
+
+})
+
+}
+
+chat-send.onclick=()=>{
+
+const t=chat-in.value
+
+if(!t)return
+
+push(ref(rtd,'messages'),{
+
+uid:currentUser.uid,
+sender:currentUser.email.split("@")[0],
+text:t,
+prestige:myData.prestige||0,
+tag:myData.activeTag,
+color:myData.color
+
+})
+
+chat-in.value=""
+
+}
+
+function summarizeNote(){
+
+const text=rich-editor.innerText
+
+const sentences=text.split(/[.!?]/)
+
+alert(sentences.slice(0,3).join("."))
+
+}
+
+function sellNotePages(){
+
+const words=rich-editor.innerText.split(/\s+/).length
+
+const pages=Math.floor(words/500)
+
+const credits=pages*25
+
+updateDoc(doc(db,"users",currentUser.uid),{
+
+credits:(myData.credits||0)+credits
+
+})
+
+alert("Sold "+pages+" pages")
+
+}
+
+function buyColor(color,price){
+
+updateDoc(doc(db,"users",currentUser.uid),{
+
+color:color,
+credits:(myData.credits||0)-price
+
+})
+
+}
+
+const TAG_SUPPLY={DEV:1,PRO:10,ELITE:5}
+
+function buyTag(tag,price){
+
+if(TAG_SUPPLY[tag]<=0)return
+
+TAG_SUPPLY[tag]--
+
+updateDoc(doc(db,"users",currentUser.uid),{
+
+activeTag:tag,
+credits:(myData.credits||0)-price
+
+})
+
+}
+
+function renderLeaderboard(){
+
+showView("leaderboard-view")
+
+getDocs(query(collection(db,"users"),orderBy("wordCount","desc")))
+
+.then(snap=>{
+
+leaderboard-list.innerHTML=""
+
+snap.forEach(d=>{
+
+const u=d.data()
+
+const row=document.createElement("div")
+
+row.innerText=
+u.email.split("@")[0]+
+" "+("★".repeat(u.prestige||0))+
+" "+u.wordCount
+
+leaderboard-list.appendChild(row)
+
+})
+
+})
+
+}
+
+let PAGE_SIZE=500
+let currentPage=0
+
+function nextPage(){
+
+const words=rich-editor.innerText.split(/\s+/)
+
+const pages=[]
+
+for(let i=0;i<words.length;i+=PAGE_SIZE){
+
+pages.push(words.slice(i,i+PAGE_SIZE).join(" "))
+
+}
+
+if(currentPage<pages.length-1){
+
+currentPage++
+
+rich-editor.innerText=pages[currentPage]
+
+}
+
+}
+
+function prevPage(){
+
+currentPage--
+
+if(currentPage<0)currentPage=0
+
+}
+
+window.showView=id=>{
+
+document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
+
+document.getElementById(id).classList.add("active")
+
+}
+
+window.createNewNote=async()=>{
+
+await addDoc(collection(db,"notes"),{
+
+title:"UNTITLED",
+content:"",
+access:[currentUser.uid],
+owner:currentUser.uid
+
+})
+
+}
+
+</script>
+
 </body>
 </html>
