@@ -234,7 +234,11 @@ button:hover{
   <div class="nav-item" onclick="renderLeaderboard()">Leaderboard</div>
   <div class="nav-item" onclick="showView('store-view')">Market</div>
 
-  <div id="folder-root"></div>
+  <div id="<div id="folder-root">
+  <h4>Folders</h4>
+  <div id="folders-list"></div>
+  <button onclick="createNewFolder()">+ New Folder</button>
+</div>"></div>
   <button onclick="createNewNote()">NEW NOTE</button>
 </aside>
 
@@ -296,11 +300,20 @@ button:hover{
 
 </div>
 
-<div class="page-controls">
+<div class="page-controls" style="position:relative;bottom:auto;right:auto;margin-top:10px;">
   <button onclick="prevPage()">Prev</button>
   <button onclick="nextPage()">Next</button>
 </div>
 
+  <div id="stats-view" class="view">
+  <h3>MY STATS</h3>
+  <div id="my-stats" style="display:flex;flex-direction:column;gap:10px">
+    <div>Level: <span id="stat-level">1</span></div>
+    <div>Prestige: <span id="stat-prestige">0</span></div>
+    <div>Credits: <span id="stat-credits">$0</span></div>
+    <div>Words Written: <span id="stat-words">0</span></div>
+  </div>
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"
 import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"
@@ -487,6 +500,77 @@ window.showView=(id)=>{
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
   document.getElementById(id).classList.add("active")
 }
+
+  // Folders
+async function loadFolders() {
+  const snap = await getDocs(query(collection(db,"notes"), where("access","array-contains",currentUser.uid)));
+  const folderList = document.getElementById("folders-list");
+  folderList.innerHTML = "";
+
+  const folders = {};
+
+  snap.forEach(doc=>{
+    const note = doc.data();
+    const folder = note.folder || "General";
+    if(!folders[folder]) folders[folder] = [];
+    folders[folder].push({id:doc.id, title:note.title});
+  });
+
+  Object.keys(folders).forEach(folderName=>{
+    const folderDiv = document.createElement("div");
+    folderDiv.innerHTML = `<strong>${folderName}</strong>`;
+    folders[folderName].forEach(note=>{
+      const noteBtn = document.createElement("div");
+      noteBtn.textContent = note.title;
+      noteBtn.style.cursor = "pointer";
+      noteBtn.onclick = ()=>loadNote(note.id);
+      folderDiv.appendChild(noteBtn);
+    });
+    folderList.appendChild(folderDiv);
+  });
+}
+
+window.createNewFolder = async () => {
+  const folderName = prompt("Folder name:");
+  if(!folderName) return;
+  // Simply create a note in the new folder as placeholder
+  await addDoc(collection(db,"notes"),{
+    title:"UNTITLED",
+    content:"",
+    folder:folderName,
+    access:[currentUser.uid],
+    owner:currentUser.uid
+  });
+  loadFolders();
+}
+
+async function loadNote(noteId){
+  const noteSnap = await getDoc(doc(db,"notes",noteId));
+  const noteData = noteSnap.data();
+  document.getElementById("note-title").value = noteData.title;
+  richEditor.innerText = noteData.content || "";
+  currentPage = 0;
+}
+
+// Update stats view whenever user data changes
+function updateStatsUI(){
+  document.getElementById("stat-level").textContent = myData.level||1;
+  document.getElementById("stat-prestige").textContent = myData.prestige||0;
+  document.getElementById("stat-credits").textContent = "$"+(myData.credits||0);
+  document.getElementById("stat-words").textContent = myData.wordCount||0;
+}
+
+// Call this when user data updates
+onSnapshot(doc(db,"users",currentUser.uid),(snap)=>{
+  myData = snap.data()||{};
+  updateUserUI();
+  updateStatsUI();
+});
+
+// Call folder loader after auth
+onAuthStateChanged(auth,user=>{
+  if(user) loadFolders();
+});
 </script>
 
 </body>
