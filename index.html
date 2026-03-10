@@ -1,502 +1,354 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <title>InfNotes</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
 <style>
-
-body{
-margin:0;
-font-family:Inter;
-background:#0b0b0e;
-color:#e6e6ea;
-display:flex;
-height:100vh;
-overflow:hidden;
+body {
+  margin: 0;
+  font-family: Inter, sans-serif;
+  background: #0b0b0e;
+  color: #e6e6ea;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
 }
-
-aside{
-width:260px;
-background:#141418;
-border-right:1px solid #222;
-padding:20px;
-display:flex;
-flex-direction:column;
-gap:10px;
-overflow-y:auto;
+aside {
+  width: 260px;
+  background: #141418;
+  border-right: 1px solid #222;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
 }
-
-main{
-flex:1;
-display:flex;
-flex-direction:column;
-padding:20px;
+aside h2 {
+  margin: 0 0 10px 0;
 }
-
-#editor{
-flex:1;
-background:#141419;
-border:1px solid #2a2a33;
-border-radius:10px;
-padding:20px;
-overflow:auto;
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
 }
-
-.block{
-padding:6px;
-outline:none;
+.button-group button {
+  flex: 1 1 48%;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #1a1a21;
+  color: white;
+  cursor: pointer;
 }
-
-.block:hover{
-background:#1b1b22;
+.button-group button:hover {
+  background: #2a2a33;
 }
-
-input{
-background:#1a1a21;
-border:1px solid #333;
-color:white;
-padding:8px;
-border-radius:6px;
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
 }
-
-.note{
-padding:6px;
-cursor:pointer;
-border-radius:6px;
+#editor {
+  flex: 1;
+  background: #141419;
+  border: 1px solid #2a2a33;
+  border-radius: 10px;
+  padding: 20px;
+  overflow-y: auto;
 }
-
-.note:hover{
-background:#1c1c22;
+.block {
+  padding: 6px;
+  outline: none;
 }
-
-.chat-msg{
-background:#1a1a22;
-padding:8px;
-margin:4px 0;
-border-radius:6px;
+.block:hover {
+  background: #1b1b22;
 }
-
-.store{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-gap:10px;
+input {
+  width: 100%;
+  background: #1a1a21;
+  border: 1px solid #333;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 10px;
 }
-
-.item{
-background:#15151c;
-border:1px solid #222;
-padding:10px;
-border-radius:6px;
-text-align:center;
-cursor:pointer;
+.note {
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 6px;
 }
-
-.hidden{
-display:none;
+.note:hover {
+  background: #1c1c22;
 }
-
+.chat-msg {
+  background: #1a1a22;
+  padding: 8px;
+  margin: 4px 0;
+  border-radius: 6px;
+}
+.store {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(120px,1fr));
+  gap: 10px;
+}
+.item {
+  background: #15151c;
+  border: 1px solid #222;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+}
+.hidden {
+  display: none;
+}
 </style>
-
 </head>
-
 <body>
 
 <aside>
+  <h2>InfNotes</h2>
+  <div id="level">Level: 1</div>
+  <div id="credits">Credits: 0</div>
 
-<h2>InfNotes</h2>
+  <div class="button-group">
+    <button onclick="show('notes')">Notes</button>
+    <button onclick="show('chat')">Chat</button>
+    <button onclick="show('store')">Market</button>
+    <button onclick="show('leaderboard')">Leaderboard</button>
+  </div>
 
-<div id="level"></div>
-<div id="credits"></div>
-
-<button onclick="show('notes')">Notes</button> <button onclick="show('chat')">Chat</button> <button onclick="show('store')">Market</button> <button onclick="show('leaderboard')">Leaderboard</button>
-
-<hr>
-
-<button onclick="newNote()">New Note</button>
-
-<div id="notes"></div>
-
+  <hr>
+  <button onclick="newNote()">New Note</button>
+  <div id="notes"></div>
 </aside>
 
 <main>
+  <div id="notesView">
+    <input id="title" placeholder="Title">
+    <div id="editor"></div>
+  </div>
 
-<div id="notesView">
+  <div id="chatView" class="hidden">
+    <div id="chatHistory" style="flex:1; overflow-y:auto;"></div>
+    <input id="chatInput" placeholder="Type a message...">
+  </div>
 
-<input id="title" placeholder="Title">
+  <div id="storeView" class="hidden">
+    <h3>Market</h3>
+    <div id="store" class="store"></div>
+  </div>
 
-<div id="editor"></div>
-
-</div>
-
-<div id="chatView" class="hidden">
-
-<div id="chatHistory"></div>
-
-<input id="chatInput">
-
-</div>
-
-<div id="storeView" class="hidden">
-
-<h3>Market</h3>
-
-<div id="store" class="store"></div>
-
-</div>
-
-<div id="leaderboardView" class="hidden">
-
-<h3>Leaderboard</h3>
-
-<div id="leaderboard"></div>
-
-</div>
-
+  <div id="leaderboardView" class="hidden">
+    <h3>Leaderboard</h3>
+    <div id="leaderboard"></div>
+  </div>
 </main>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"
-
 import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"
-
 import { getFirestore,doc,setDoc,getDoc,collection,addDoc,updateDoc,getDocs,query,where,orderBy,onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"
-
 import { getDatabase,ref,push,onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"
 
-
 const firebaseConfig={
-apiKey:"YOUR_KEY",
-authDomain:"YOUR_DOMAIN",
-projectId:"YOUR_PROJECT",
-databaseURL:"YOUR_DB"
+  apiKey:"YOUR_KEY",
+  authDomain:"YOUR_DOMAIN",
+  projectId:"YOUR_PROJECT",
+  databaseURL:"YOUR_DB"
 }
-
 const app=initializeApp(firebaseConfig)
-
 const auth=getAuth(app)
 const db=getFirestore(app)
 const rtdb=getDatabase(app)
 
-let user=null
-let currentNote=null
+let user = null
+let currentNote = null
 
+const editor = document.getElementById("editor")
+const notesDiv = document.getElementById("notes")
+const chatInput = document.getElementById("chatInput")
+const chatHistory = document.getElementById("chatHistory")
+const titleInput = document.getElementById("title")
+const storeDiv = document.getElementById("store")
+const leaderboardDiv = document.getElementById("leaderboard")
 
 /* AUTH */
-
 async function login(email,password){
-
-try{
-
-await signInWithEmailAndPassword(auth,email,password)
-
-}catch{
-
-const cred=await createUserWithEmailAndPassword(auth,email,password)
-
-await setDoc(doc(db,"users",cred.user.uid),{
-
-email:email,
-words:0,
-level:1,
-credits:0,
-prestige:0
-
-})
-
+  try {
+    await signInWithEmailAndPassword(auth,email,password)
+  } catch {
+    const cred = await createUserWithEmailAndPassword(auth,email,password)
+    await setDoc(doc(db,"users",cred.user.uid),{
+      email: email,
+      words: 0,
+      level: 1,
+      credits: 0,
+      prestige: 0
+    })
+  }
 }
-
-}
-
 
 onAuthStateChanged(auth,u=>{
-
-if(!u)return
-
-user=u
-
-loadNotes()
-loadStore()
-initChat()
-loadLeaderboard()
-
+  if(!u) return
+  user = u
+  loadNotes()
+  loadStore()
+  initChat()
+  loadLeaderboard()
 })
-
-
 
 /* BLOCK EDITOR */
-
-function newBlock(text=""){
-
-const div=document.createElement("div")
-
-div.className="block"
-
-div.contentEditable=true
-
-div.innerText=text
-
-div.addEventListener("keydown",handleBlockKeys)
-
-editor.appendChild(div)
-
-div.focus()
-
+function newBlock(text="") {
+  const div = document.createElement("div")
+  div.className = "block"
+  div.contentEditable = true
+  div.innerText = text
+  div.addEventListener("keydown", handleBlockKeys)
+  editor.appendChild(div)
+  div.focus()
 }
 
-newBlock()
-
-
-
-function handleBlockKeys(e){
-
-const block=e.target
-
-if(e.key==="Enter"){
-
-e.preventDefault()
-
-newBlock()
-
-saveNote()
-
+function handleBlockKeys(e) {
+  const block = e.target
+  if(e.key==="Enter") {
+    e.preventDefault()
+    newBlock()
+    saveNote()
+  }
+  if(e.key==="Backspace" && block.innerText==="") {
+    block.remove()
+    saveNote()
+  }
+  if(block.innerText.startsWith("/")) slashCommand(block)
+  markdownParse(block)
 }
-
-if(e.key==="Backspace" && block.innerText===""){
-
-block.remove()
-
-}
-
-if(block.innerText.startsWith("/")){
-
-slashCommand(block)
-
-}
-
-markdownParse(block)
-
-}
-
-
 
 function slashCommand(block){
-
-const cmd=block.innerText.trim()
-
-if(cmd==="/h1") block.outerHTML="<h1 class='block' contenteditable>Header</h1>"
-if(cmd==="/h2") block.outerHTML="<h2 class='block' contenteditable>Header</h2>"
-if(cmd==="/quote") block.outerHTML="<blockquote class='block' contenteditable>Quote</blockquote>"
-if(cmd==="/todo") block.outerHTML="<div class='block'><input type='checkbox'> Todo</div>"
-
+  const cmd = block.innerText.trim()
+  if(cmd==="/h1") block.outerHTML="<h1 class='block' contenteditable>Header</h1>"
+  if(cmd==="/h2") block.outerHTML="<h2 class='block' contenteditable>Header</h2>"
+  if(cmd==="/quote") block.outerHTML="<blockquote class='block' contenteditable>Quote</blockquote>"
+  if(cmd==="/todo") block.outerHTML="<div class='block'><input type='checkbox'> Todo</div>"
 }
-
-
 
 function markdownParse(block){
-
-let t=block.innerText
-
-if(t.startsWith("# ")) block.outerHTML="<h1 class='block' contenteditable>"+t.slice(2)+"</h1>"
-if(t.startsWith("## ")) block.outerHTML="<h2 class='block' contenteditable>"+t.slice(3)+"</h2>"
-if(t.startsWith("> ")) block.outerHTML="<blockquote class='block' contenteditable>"+t.slice(2)+"</blockquote>"
-
+  let t = block.innerText
+  if(t.startsWith("# ")) block.outerHTML="<h1 class='block' contenteditable>"+t.slice(2)+"</h1>"
+  if(t.startsWith("## ")) block.outerHTML="<h2 class='block' contenteditable>"+t.slice(3)+"</h2>"
+  if(t.startsWith("> ")) block.outerHTML="<blockquote class='block' contenteditable>"+t.slice(2)+"</blockquote>"
 }
 
-
+newBlock()
+editor.addEventListener("input", saveNote)
+titleInput.addEventListener("input", saveNote)
 
 /* NOTES */
-
-async function newNote(){
-
-const ref=await addDoc(collection(db,"notes"),{
-
-owner:user.uid,
-title:"Untitled",
-content:""
-
-})
-
-currentNote=ref.id
-
+async function newNote() {
+  const ref = await addDoc(collection(db,"notes"),{
+    owner: user.uid,
+    title: "Untitled",
+    content: ""
+  })
+  currentNote = ref.id
+  editor.innerHTML = ""
+  titleInput.value = ""
+  newBlock()
+  loadNotes()
 }
 
-
-
-async function loadNotes(){
-
-const q=query(collection(db,"notes"),where("owner","==",user.uid))
-
-onSnapshot(q,snap=>{
-
-notes.innerHTML=""
-
-snap.forEach(d=>{
-
-const div=document.createElement("div")
-
-div.className="note"
-
-div.innerText=d.data().title
-
-div.onclick=()=>openNote(d.id)
-
-notes.appendChild(div)
-
-})
-
-})
-
+async function loadNotes() {
+  const q = query(collection(db,"notes"), where("owner","==",user.uid))
+  onSnapshot(q, snap=>{
+    notesDiv.innerHTML=""
+    snap.forEach(d=>{
+      const div = document.createElement("div")
+      div.className = "note"
+      div.innerText = d.data().title
+      div.onclick = ()=>openNote(d.id)
+      notesDiv.appendChild(div)
+    })
+  })
 }
-
-
 
 async function openNote(id){
-
-currentNote=id
-
-const snap=await getDoc(doc(db,"notes",id))
-
-title.value=snap.data().title
-
-editor.innerHTML=snap.data().content
-
+  currentNote = id
+  const snap = await getDoc(doc(db,"notes",id))
+  titleInput.value = snap.data().title
+  editor.innerHTML = snap.data().content
 }
-
-
 
 /* AUTOSAVE */
-
-editor.addEventListener("input",saveNote)
-
-title.addEventListener("input",saveNote)
-
-
-
 async function saveNote(){
-
-if(!currentNote)return
-
-await updateDoc(doc(db,"notes",currentNote),{
-
-title:title.value,
-content:editor.innerHTML
-
-})
-
+  if(!currentNote) return
+  await updateDoc(doc(db,"notes",currentNote),{
+    title: titleInput.value,
+    content: editor.innerHTML
+  })
 }
-
-
 
 /* CHAT */
-
 function initChat(){
-
-onChildAdded(ref(rtdb,"messages"),snap=>{
-
-const m=snap.val()
-
-const div=document.createElement("div")
-
-div.className="chat-msg"
-
-div.innerText=m.sender+": "+m.text
-
-chatHistory.appendChild(div)
-
-})
-
-chatInput.addEventListener("keypress",e=>{
-
-if(e.key==="Enter"){
-
-push(ref(rtdb,"messages"),{
-
-sender:user.email.split("@")[0],
-text:chatInput.value
-
-})
-
-chatInput.value=""
-
+  onChildAdded(ref(rtdb,"messages"), snap=>{
+    const m = snap.val()
+    const div = document.createElement("div")
+    div.className="chat-msg"
+    div.innerText = m.sender + ": " + m.text
+    chatHistory.appendChild(div)
+    chatHistory.scrollTop = chatHistory.scrollHeight
+  })
+  chatInput.addEventListener("keypress", e=>{
+    if(e.key==="Enter"){
+      push(ref(rtdb,"messages"),{
+        sender: user.email.split("@")[0],
+        text: chatInput.value
+      })
+      chatInput.value=""
+    }
+  })
 }
-
-})
-
-}
-
-
 
 /* STORE */
-
 async function loadStore(){
-
-const snap=await getDocs(collection(db,"store"))
-
-snap.forEach(d=>{
-
-const item=d.data()
-
-if(item.stock<=0)return
-
-const div=document.createElement("div")
-
-div.className="item"
-
-div.innerHTML=d.id+"<br>"+item.price+" credits"
-
-store.appendChild(div)
-
-})
-
+  const snap = await getDocs(collection(db,"store"))
+  storeDiv.innerHTML=""
+  snap.forEach(d=>{
+    const item = d.data()
+    if(item.stock<=0) return
+    const div = document.createElement("div")
+    div.className="item"
+    div.innerHTML = d.id + "<br>" + item.price + " credits"
+    storeDiv.appendChild(div)
+  })
 }
-
-
 
 /* LEADERBOARD */
-
 async function loadLeaderboard(){
-
-const snap=await getDocs(query(collection(db,"users"),orderBy("words","desc")))
-
-snap.forEach(d=>{
-
-const u=d.data()
-
-const row=document.createElement("div")
-
-row.innerText=u.email+" "+u.words
-
-leaderboard.appendChild(row)
-
-})
-
+  const snap = await getDocs(query(collection(db,"users"),orderBy("words","desc")))
+  leaderboardDiv.innerHTML=""
+  snap.forEach(d=>{
+    const u = d.data()
+    const row = document.createElement("div")
+    row.innerText = u.email + " " + u.words
+    leaderboardDiv.appendChild(row)
+  })
 }
 
-
-
-/* VIEW */
-
-window.show=v=>{
-
-notesView.classList.add("hidden")
-chatView.classList.add("hidden")
-storeView.classList.add("hidden")
-leaderboardView.classList.add("hidden")
-
-if(v=="notes")notesView.classList.remove("hidden")
-if(v=="chat")chatView.classList.remove("hidden")
-if(v=="store")storeView.classList.remove("hidden")
-if(v=="leaderboard")leaderboardView.classList.remove("hidden")
-
+/* VIEW SWITCH */
+function show(v){
+  document.getElementById("notesView").classList.add("hidden")
+  document.getElementById("chatView").classList.add("hidden")
+  document.getElementById("storeView").classList.add("hidden")
+  document.getElementById("leaderboardView").classList.add("hidden")
+  if(v=="notes") document.getElementById("notesView").classList.remove("hidden")
+  if(v=="chat") document.getElementById("chatView").classList.remove("hidden")
+  if(v=="store") document.getElementById("storeView").classList.remove("hidden")
+  if(v=="leaderboard") document.getElementById("leaderboardView").classList.remove("hidden")
 }
-
 </script>
-
 </body>
 </html>
