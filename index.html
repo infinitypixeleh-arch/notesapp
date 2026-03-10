@@ -42,7 +42,19 @@ aside h2 { margin:0 0 10px 0;}
   transition:0.2s;
 }
 .button-group button:hover { background:#2a2a33;}
-.folder { font-weight:bold; margin-top:10px; }
+#newFolderBtn, #prestigeBtn {
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+  border:none;
+  border-radius:6px;
+  background:#1a1a21;
+  color:white;
+  cursor:pointer;
+  transition:0.2s;
+}
+#newFolderBtn:hover, #prestigeBtn:hover { background:#2a2a33; }
+.folder { font-weight:bold; margin-top:10px; cursor:pointer; }
 .note { padding:6px 6px 6px 12px; cursor:pointer; border-radius:6px; }
 .note:hover { background:#1c1c22;}
 main {
@@ -91,8 +103,9 @@ input { width:100%; background:#1a1a21; border:1px solid #333; color:white; padd
 </div>
 
 <hr>
-<button onclick="newFolder()">New Folder</button>
+<button id="newFolderBtn">+ New Folder</button>
 <div id="folders"></div>
+<button id="prestigeBtn">Prestige</button>
 </aside>
 
 <main>
@@ -149,6 +162,8 @@ const xpSpan = document.getElementById("xp")
 const levelSpan = document.getElementById("level")
 const prestigeSpan = document.getElementById("prestige")
 const creditsSpan = document.getElementById("credits")
+const newFolderBtn = document.getElementById("newFolderBtn")
+const prestigeBtn = document.getElementById("prestigeBtn")
 
 /* AUTH */
 async function login(email,password){
@@ -181,54 +196,89 @@ async function loadUserData(){
   const snap = await getDoc(docRef)
   if(!snap.exists()) return
   const data=snap.data()
-  xpSpan.innerText=data.xp
+  xpSpan.innerText=Math.floor(data.xp)
   levelSpan.innerText=data.level
   prestigeSpan.innerText=data.prestige
   creditsSpan.innerText=data.credits
 }
 
-/* FOLDERS & NOTES */
-async function newFolder(){
+/* NEW FOLDER */
+newFolderBtn.addEventListener("click", async ()=>{
   const name = prompt("Folder Name")
   if(!name) return
-  const ref = await addDoc(collection(db,"folders"),{
+  await addDoc(collection(db,"folders"),{
     owner:user.uid,
     name:name
   })
-  loadFolders()
-}
+})
 
+/* PRESTIGE */
+prestigeBtn.addEventListener("click", async ()=>{
+  const userRef = doc(db,"users",user.uid)
+  const snap = await getDoc(userRef)
+  let data = snap.data()
+  let threshold = 100*data.level
+  if(data.xp<threshold) return alert("Reach max level to prestige!")
+  let newPrestige = data.prestige+1
+  await updateDoc(userRef,{
+    xp:0,
+    level:1,
+    prestige:newPrestige
+  })
+  loadUserData()
+})
+
+/* FOLDERS WITH COLLAPSIBLE NOTES */
 async function loadFolders(){
   const q=query(collection(db,"folders"),where("owner","==",user.uid))
   onSnapshot(q, snap=>{
     foldersDiv.innerHTML=""
-    snap.forEach(f=>{
-      const div = document.createElement("div")
-      div.className="folder"
-      div.innerText=f.data().name
-      div.onclick=()=>loadNotes(f.id)
-      foldersDiv.appendChild(div)
+    snap.forEach(async f=>{
+      const folderDiv = document.createElement("div")
+      folderDiv.className="folder"
+      folderDiv.style.cursor="pointer"
+      folderDiv.innerHTML = "▶ "+f.data().name
+      const notesList = document.createElement("div")
+      notesList.style.marginLeft="15px"
+      notesList.style.display="none"
+      folderDiv.appendChild(notesList)
+      folderDiv.addEventListener("click", async ()=>{
+        if(notesList.style.display==="none"){
+          folderDiv.innerHTML = "▼ "+f.data().name
+          folderDiv.appendChild(notesList)
+          await loadNotes(f.id, notesList)
+          notesList.style.display="block"
+        } else {
+          folderDiv.innerHTML = "▶ "+f.data().name
+          folderDiv.appendChild(notesList)
+          notesList.style.display="none"
+        }
+      })
+      foldersDiv.appendChild(folderDiv)
     })
   })
 }
 
-async function loadNotes(folderId){
-  currentFolder=folderId
-  const notesDiv = document.createElement("div")
-  const q=query(collection(db,"notes"),where("folder","==",folderId))
-  onSnapshot(q,snap=>{
-    notesDiv.innerHTML=""
+/* LOAD NOTES INTO FOLDER */
+async function loadNotes(folderId, notesList){
+  const q = query(collection(db,"notes"), where("folder","==",folderId))
+  onSnapshot(q, snap=>{
+    notesList.innerHTML=""
     snap.forEach(n=>{
       const noteDiv = document.createElement("div")
       noteDiv.className="note"
-      noteDiv.innerText=n.data().title
-      noteDiv.onclick=()=>openNote(n.id)
-      notesDiv.appendChild(noteDiv)
+      noteDiv.innerText = n.data().title
+      noteDiv.style.marginLeft="10px"
+      noteDiv.onclick = (e)=>{
+        e.stopPropagation()
+        openNote(n.id)
+      }
+      notesList.appendChild(noteDiv)
     })
   })
-  foldersDiv.appendChild(notesDiv)
 }
 
+/* NEW NOTE */
 async function newNote(){
   if(!currentFolder) return alert("Select a folder first")
   const ref=await addDoc(collection(db,"notes"),{
@@ -243,6 +293,7 @@ async function newNote(){
   newBlock()
 }
 
+/* OPEN NOTE */
 async function openNote(id){
   currentNote=id
   const snap = await getDoc(doc(db,"notes",id))
@@ -261,7 +312,6 @@ function newBlock(text=""){
   editor.appendChild(div)
   div.focus()
 }
-
 function handleBlockKeys(e){
   const block=e.target
   if(e.key==="Enter"){ e.preventDefault(); newBlock(); saveNote() }
@@ -269,7 +319,6 @@ function handleBlockKeys(e){
   if(block.innerText.startsWith("/")) slashCommand(block)
   markdownParse(block)
 }
-
 function slashCommand(block){
   const cmd=block.innerText.trim()
   if(cmd==="/h1") block.outerHTML="<h1 class='block' contenteditable>Header</h1>"
@@ -277,44 +326,33 @@ function slashCommand(block){
   if(cmd==="/quote") block.outerHTML="<blockquote class='block' contenteditable>Quote</blockquote>"
   if(cmd==="/todo") block.outerHTML="<div class='block'><input type='checkbox'> Todo</div>"
 }
-
 function markdownParse(block){
   let t=block.innerText
   if(t.startsWith("# ")) block.outerHTML="<h1 class='block' contenteditable>"+t.slice(2)+"</h1>"
   if(t.startsWith("## ")) block.outerHTML="<h2 class='block' contenteditable>"+t.slice(3)+"</h2>"
   if(t.startsWith("> ")) block.outerHTML="<blockquote class='block' contenteditable>"+t.slice(2)+"</blockquote>"
 }
-
 newBlock()
 editor.addEventListener("input",saveNote)
 titleInput.addEventListener("input",saveNote)
 
-/* AUTOSAVE & LEVEL UP */
+/* SAVE & XP / LEVEL / PRESTIGE */
 async function saveNote(){
   if(!currentNote) return
   await updateDoc(doc(db,"notes",currentNote),{
     title:titleInput.value,
     content:editor.innerHTML
   })
-  // Calculate XP by words
   const words = editor.innerText.split(/\s+/).filter(Boolean).length
   const userRef = doc(db,"users",user.uid)
   const snap = await getDoc(userRef)
   let data = snap.data()
-  let xpGain = words
-  // Apply prestige multiplier
-  xpGain *= (1 + data.prestige*0.1)
+  let xpGain = words*(1+data.prestige*0.1)
   let newXP = data.xp + xpGain
   let newLevel = data.level
   let threshold = 100*newLevel
-  if(newXP>=threshold){
-    newLevel++
-    newXP -= threshold
-  }
-  await updateDoc(userRef,{
-    xp:newXP,
-    level:newLevel
-  })
+  if(newXP>=threshold){ newLevel++; newXP-=threshold }
+  await updateDoc(userRef,{xp:newXP, level:newLevel})
   loadUserData()
 }
 
