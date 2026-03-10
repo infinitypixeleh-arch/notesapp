@@ -9,18 +9,20 @@
 
 <style>
 :root{
-  --bg:#050505;
-  --panel:#0a0a0a;
+  --bg:#0a0a0a;
+  --panel:#111;
   --accent:#a29bfe;
-  --text:#888;
-  --text-focus:#e0e0e0;
-  --border:#151515;
-  --sidebar-w:240px;
+  --text:#ccc;
+  --text-focus:#fff;
+  --border:#222;
+  --sidebar-w:250px;
   --xp:#fdcb6e;
   --credits:#00d2d3;
+  --card-bg:rgba(20,20,20,0.8);
+  --card-shadow:0 4px 20px rgba(0,0,0,0.5);
 }
 
-*{box-sizing:border-box}
+*{box-sizing:border-box;}
 body{
   margin:0;
   background:var(--bg);
@@ -30,25 +32,50 @@ body{
   display:flex;
   overflow:hidden;
 }
+
+/* Sidebar */
 aside{
   width:var(--sidebar-w);
   background:var(--panel);
   border-right:1px solid var(--border);
-  padding:35px 20px;
+  padding:30px 20px;
   display:flex;
   flex-direction:column;
   overflow-y:auto;
 }
-.nav-item{
-  padding:8px 10px;
-  cursor:pointer;
-  font-size:0.75rem;
-  border-radius:4px;
+#my-lvl-text{
+  font-weight:600;
+  margin-bottom:5px;
+  font-size:1.1rem;
 }
-.nav-item:hover{background:#111;color:white}
+#my-stars{
+  color:#fdcb6e;
+  margin-bottom:5px;
+}
+#my-creds{
+  color:#00d2d3;
+  margin-bottom:15px;
+}
+.nav-item{
+  padding:10px 12px;
+  margin:4px 0;
+  cursor:pointer;
+  font-size:0.85rem;
+  border-radius:6px;
+  transition:0.2s;
+}
+.nav-item:hover{
+  background:var(--accent);
+  color:#111;
+  font-weight:500;
+}
+
+/* Main view */
 .view-container{
   flex:1;
   display:flex;
+  flex-direction:column;
+  padding:20px;
 }
 .view{
   display:none;
@@ -57,88 +84,130 @@ aside{
   flex-direction:column;
 }
 .view.active{display:flex}
+
+/* Notes editor */
 #rich-editor{
   flex:1;
-  padding:20px 80px;
+  padding:20px;
   font-size:1rem;
   line-height:1.8;
-  color:#c0c0c0;
+  color:#eee;
   outline:none;
   overflow-y:auto;
-  background:#0a0a0a;
+  background:var(--card-bg);
+  border-radius:12px;
+  margin-top:10px;
   border:1px solid var(--border);
-  border-radius:8px;
+  box-shadow:var(--card-shadow);
+  backdrop-filter:blur(4px);
+}
+input, button{
+  border:none;
+  border-radius:6px;
+  outline:none;
+  font-size:0.9rem;
+}
+input{
+  padding:10px;
+  margin-bottom:10px;
+  width:100%;
+  background:#222;
+  color:#eee;
+}
+button{
+  cursor:pointer;
+  padding:10px 16px;
+  background:var(--accent);
+  color:#111;
+  font-weight:600;
+  transition:0.2s;
+}
+button:hover{
+  transform:scale(1.05);
+}
+
+/* Chat */
+#chat-history{
+  flex:1;
+  overflow-y:auto;
+  padding:15px;
+}
+.chat-bar{
+  display:flex;
   margin-top:10px;
 }
+#chat-in{
+  flex:1;
+  padding:10px;
+  border-radius:6px;
+  background:#222;
+  color:#eee;
+  margin-right:10px;
+  border:1px solid var(--border);
+}
+#chat-send{
+  padding:10px 16px;
+}
+
+/* Chat bubbles */
 .msg-bubble{
-  background:#111;
+  background:var(--card-bg);
   padding:12px 18px;
-  border-radius:8px;
+  border-radius:12px;
   max-width:70%;
-  border:1px solid #151515;
+  border:1px solid var(--border);
   margin-bottom:8px;
   word-wrap:break-word;
+  box-shadow:var(--card-shadow);
 }
+
+/* Leaderboard */
+#leaderboard-list div{
+  padding:10px;
+  margin:5px 0;
+  background:var(--card-bg);
+  border-radius:10px;
+  box-shadow:var(--card-shadow);
+}
+
+/* Store */
 .store-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:15px;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:20px;
   margin-top:20px;
 }
 .store-card{
-  background:#0a0a0a;
-  border:1px solid #151515;
+  background:var(--card-bg);
+  border:1px solid var(--border);
   padding:15px;
-  border-radius:8px;
+  border-radius:12px;
   text-align:center;
   cursor:pointer;
+  transition:0.3s;
+  box-shadow:var(--card-shadow);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
+.store-card:hover{
+  transform:scale(1.05);
+  background:rgba(160,155,254,0.15);
+}
+.store-card span{
+  margin-top:8px;
+  font-size:0.85rem;
+  color:#aaa;
+  font-weight:500;
+}
+
+/* Page controls */
 .page-controls{
   position:fixed;
   bottom:20px;
   right:20px;
   display:flex;
   gap:10px;
-}
-input, button{
-  border:none;
-  border-radius:4px;
-  outline:none;
-}
-button{
-  cursor:pointer;
-  padding:10px 15px;
-  background:var(--accent);
-  color:#111;
-  font-weight:500;
-}
-input{
-  padding:10px;
-  margin-bottom:10px;
-  width:100%;
-  background:#111;
-  color:#eee;
-}
-#chat-in{
-  flex:1;
-  padding:10px;
-  margin-right:10px;
-  border-radius:4px;
-  background:#111;
-  color:#eee;
-  border:1px solid var(--border);
-}
-#chat-send{
-  padding:10px 15px;
-  background:var(--accent);
-  color:#111;
-  font-weight:500;
-  border-radius:4px;
-}
-.chat-bar{
-  display:flex;
-  padding:10px;
-  border-top:1px solid var(--border);
 }
 </style>
 </head>
@@ -194,13 +263,34 @@ input{
   <div id="store-view" class="view">
     <h3>RARITY STORE</h3>
     <div class="store-grid">
-      <div class="store-card" onclick="buyColor('#ff7675',50)">ROSE</div>
-      <div class="store-card" onclick="buyColor('#55efc4',50)">MINT</div>
-      <div class="store-card" onclick="buyColor('#74b9ff',50)">SKY</div>
-      <div class="store-card" onclick="buyTag('DEV',0)">DEV TAG</div>
-      <div class="store-card" onclick="buyTag('PRO',100)">PRO</div>
-      <div class="store-card" onclick="buyTag('ELITE',150)">ELITE</div>
-      <div class="store-card" onclick="sellNotePages()">SELL PAGES</div>
+     <div class="store-card" onclick="buyColor('#ff7675',50)">
+  ROSE
+  <span>50 💰</span>
+</div>
+<div class="store-card" onclick="buyColor('#55efc4',50)">
+  MINT
+  <span>50 💰</span>
+</div>
+<div class="store-card" onclick="buyColor('#74b9ff',50)">
+  SKY
+  <span>50 💰</span>
+</div>
+<div class="store-card" onclick="buyTag('DEV',0)">
+  DEV TAG
+  <span>0 💰</span>
+</div>
+<div class="store-card" onclick="buyTag('PRO',100)">
+  PRO
+  <span>100 💰</span>
+</div>
+<div class="store-card" onclick="buyTag('ELITE',150)">
+  ELITE
+  <span>150 💰</span>
+</div>
+<div class="store-card" onclick="sellNotePages()">
+  SELL PAGES
+  <span>25 💰 / 500 words</span>
+</div>
     </div>
   </div>
 
