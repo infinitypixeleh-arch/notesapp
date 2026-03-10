@@ -5,77 +5,21 @@
 <title>InfNotes</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-body {
-  margin:0;
-  font-family:Inter,sans-serif;
-  background:#0b0b0e;
-  color:#e6e6ea;
-  display:flex;
-  height:100vh;
-  overflow:hidden;
-}
-aside {
-  width:280px;
-  background:#141418;
-  border-right:1px solid #222;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  overflow-y:auto;
-}
+body {margin:0;font-family:Inter,sans-serif;background:#0b0b0e;color:#e6e6ea;display:flex;height:100vh;overflow:hidden;}
+aside {width:280px;background:#141418;border-right:1px solid #222;padding:20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
 aside h2 { margin:0 0 10px 0;}
-.user-stats {
-  font-size:14px;
-  margin-bottom:10px;
-  line-height:1.4;
-}
+.user-stats { font-size:14px;margin-bottom:10px;line-height:1.4;}
 .button-group { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;}
-.button-group button {
-  flex:1 1 48%;
-  padding:8px;
-  border:none;
-  border-radius:6px;
-  background:#1a1a21;
-  color:white;
-  cursor:pointer;
-  transition:0.2s;
-}
+.button-group button { flex:1 1 48%; padding:8px; border:none; border-radius:6px; background:#1a1a21; color:white; cursor:pointer; transition:0.2s;}
 .button-group button:hover { background:#2a2a33;}
-#newFolderBtn, #prestigeBtn {
-  width:100%;
-  padding:8px;
-  margin:5px 0;
-  border:none;
-  border-radius:6px;
-  background:#1a1a21;
-  color:white;
-  cursor:pointer;
-  transition:0.2s;
-}
+#newFolderBtn, #prestigeBtn { width:100%; padding:8px; margin:5px 0; border:none; border-radius:6px; background:#1a1a21; color:white; cursor:pointer; transition:0.2s;}
 #newFolderBtn:hover, #prestigeBtn:hover { background:#2a2a33; }
-.folder { font-weight:bold; margin-top:10px; cursor:pointer; }
-.note { padding:6px 6px 6px 12px; cursor:pointer; border-radius:6px; }
+.folder { font-weight:bold; margin-top:10px; cursor:pointer; user-select:none;}
+.note { padding:6px 6px 6px 12px; cursor:pointer; border-radius:6px; user-select:none;}
 .note:hover { background:#1c1c22;}
-main {
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  padding:20px;
-  overflow-y:auto;
-}
-#editor {
-  flex:1;
-  background:#141419;
-  border:1px solid #2a2a33;
-  border-radius:10px;
-  padding:20px;
-  overflow-y:auto;
-}
-.block {
-  padding:6px;
-  outline:none;
-}
+main { flex:1; display:flex; flex-direction:column; padding:20px; overflow-y:auto;}
+#editor { flex:1; background:#141419; border:1px solid #2a2a33; border-radius:10px; padding:20px; overflow-y:auto; min-height:200px;}
+.block { padding:6px; outline:none; }
 .block:hover { background:#1b1b22;}
 input { width:100%; background:#1a1a21; border:1px solid #333; color:white; padding:8px; border-radius:6px; margin-bottom:10px; }
 .chat-msg { background:#1a1a22; padding:8px; margin:4px 0; border-radius:6px;}
@@ -89,17 +33,17 @@ input { width:100%; background:#1a1a21; border:1px solid #333; color:white; padd
 <aside>
 <h2>InfNotes</h2>
 <div class="user-stats">
-  Level: <span id="level">1</span><br>
-  Prestige: <span id="prestige">0</span><br>
-  XP: <span id="xp">0</span><br>
-  Credits: <span id="credits">0</span>
+Level: <span id="level">1</span><br>
+Prestige: <span id="prestige">0</span><br>
+XP: <span id="xp">0</span><br>
+Credits: <span id="credits">0</span>
 </div>
 
 <div class="button-group">
-  <button onclick="show('notes')">Notes</button>
-  <button onclick="show('chat')">Chat</button>
-  <button onclick="show('store')">Market</button>
-  <button onclick="show('leaderboard')">Leaderboard</button>
+<button id="notesBtn">Notes</button>
+<button id="chatBtn">Chat</button>
+<button id="storeBtn">Market</button>
+<button id="leaderboardBtn">Leaderboard</button>
 </div>
 
 <hr>
@@ -110,13 +54,13 @@ input { width:100%; background:#1a1a21; border:1px solid #333; color:white; padd
 
 <main>
 <div id="notesView">
-  <input id="title" placeholder="Title">
-  <div id="editor"></div>
+<input id="title" placeholder="Title">
+<div id="editor"></div>
 </div>
 
 <div id="chatView" class="hidden">
-  <div id="chatHistory" style="flex:1; overflow-y:auto;"></div>
-  <input id="chatInput" placeholder="Type a message...">
+<div id="chatHistory" style="flex:1; overflow-y:auto;"></div>
+<input id="chatInput" placeholder="Type a message...">
 </div>
 
 <div id="storeView" class="hidden">
@@ -136,12 +80,7 @@ import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEma
 import { getFirestore,doc,setDoc,getDoc,collection,addDoc,updateDoc,getDocs,query,where,orderBy,onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"
 import { getDatabase,ref,push,onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"
 
-const firebaseConfig={
-  apiKey:"YOUR_KEY",
-  authDomain:"YOUR_DOMAIN",
-  projectId:"YOUR_PROJECT",
-  databaseURL:"YOUR_DB"
-}
+const firebaseConfig={apiKey:"YOUR_KEY",authDomain:"YOUR_DOMAIN",projectId:"YOUR_PROJECT",databaseURL:"YOUR_DB"}
 const app=initializeApp(firebaseConfig)
 const auth=getAuth(app)
 const db=getFirestore(app)
@@ -151,268 +90,250 @@ let user=null
 let currentNote=null
 let currentFolder=null
 
-const editor = document.getElementById("editor")
-const titleInput = document.getElementById("title")
-const foldersDiv = document.getElementById("folders")
-const chatInput = document.getElementById("chatInput")
-const chatHistory = document.getElementById("chatHistory")
-const storeDiv = document.getElementById("store")
-const leaderboardDiv = document.getElementById("leaderboard")
-const xpSpan = document.getElementById("xp")
-const levelSpan = document.getElementById("level")
-const prestigeSpan = document.getElementById("prestige")
-const creditsSpan = document.getElementById("credits")
-const newFolderBtn = document.getElementById("newFolderBtn")
-const prestigeBtn = document.getElementById("prestigeBtn")
+// Elements
+const editor=document.getElementById("editor")
+const titleInput=document.getElementById("title")
+const foldersDiv=document.getElementById("folders")
+const chatInput=document.getElementById("chatInput")
+const chatHistory=document.getElementById("chatHistory")
+const storeDiv=document.getElementById("store")
+const leaderboardDiv=document.getElementById("leaderboard")
+const xpSpan=document.getElementById("xp")
+const levelSpan=document.getElementById("level")
+const prestigeSpan=document.getElementById("prestige")
+const creditsSpan=document.getElementById("credits")
+const newFolderBtn=document.getElementById("newFolderBtn")
+const prestigeBtn=document.getElementById("prestigeBtn")
+const notesBtn=document.getElementById("notesBtn")
+const chatBtn=document.getElementById("chatBtn")
+const storeBtn=document.getElementById("storeBtn")
+const leaderboardBtn=document.getElementById("leaderboardBtn")
 
-/* AUTH */
+// AUTH
 async function login(email,password){
-  try { await signInWithEmailAndPassword(auth,email,password) }
-  catch {
-    const cred=await createUserWithEmailAndPassword(auth,email,password)
-    await setDoc(doc(db,"users",cred.user.uid),{
-      email:email,
-      xp:0,
-      level:1,
-      prestige:0,
-      credits:0
-    })
-  }
+try { await signInWithEmailAndPassword(auth,email,password) }
+catch { const cred=await createUserWithEmailAndPassword(auth,email,password)
+await setDoc(doc(db,"users",cred.user.uid),{email:email,xp:0,level:1,prestige:0,credits:0})}
 }
 
 onAuthStateChanged(auth,u=>{
-  if(!u) return
-  user=u
-  loadUserData()
-  loadFolders()
-  loadStore()
-  initChat()
-  loadLeaderboard()
+if(!u) return
+user=u
+loadUserData()
+loadFolders()
+loadStore()
+initChat()
+loadLeaderboard()
 })
 
-/* USER DATA */
+// USER DATA
 async function loadUserData(){
-  const docRef=doc(db,"users",user.uid)
-  const snap = await getDoc(docRef)
-  if(!snap.exists()) return
-  const data=snap.data()
-  xpSpan.innerText=Math.floor(data.xp)
-  levelSpan.innerText=data.level
-  prestigeSpan.innerText=data.prestige
-  creditsSpan.innerText=data.credits
+const docRef=doc(db,"users",user.uid)
+const snap=await getDoc(docRef)
+if(!snap.exists()) return
+const data=snap.data()
+xpSpan.innerText=Math.floor(data.xp)
+levelSpan.innerText=data.level
+prestigeSpan.innerText=data.prestige
+creditsSpan.innerText=data.credits
 }
 
-/* NEW FOLDER */
+// NAV BUTTONS
+notesBtn.addEventListener("click",()=>show("notes"))
+chatBtn.addEventListener("click",()=>show("chat"))
+storeBtn.addEventListener("click",()=>show("store"))
+leaderboardBtn.addEventListener("click",()=>show("leaderboard"))
+
+// NEW FOLDER
 newFolderBtn.addEventListener("click", async ()=>{
-  const name = prompt("Folder Name")
-  if(!name) return
-  await addDoc(collection(db,"folders"),{
-    owner:user.uid,
-    name:name
-  })
+const name=prompt("Folder Name")
+if(!name) return
+await addDoc(collection(db,"folders"),{owner:user.uid,name:name})
 })
 
-/* PRESTIGE */
-prestigeBtn.addEventListener("click", async ()=>{
-  const userRef = doc(db,"users",user.uid)
-  const snap = await getDoc(userRef)
-  let data = snap.data()
-  let threshold = 100*data.level
-  if(data.xp<threshold) return alert("Reach max level to prestige!")
-  let newPrestige = data.prestige+1
-  await updateDoc(userRef,{
-    xp:0,
-    level:1,
-    prestige:newPrestige
-  })
-  loadUserData()
+// PRESTIGE
+prestigeBtn.addEventListener("click",async()=>{
+const userRef=doc(db,"users",user.uid)
+const snap=await getDoc(userRef)
+let data=snap.data()
+let threshold=100*data.level
+if(data.xp<threshold) return alert("Reach max level to prestige!")
+await updateDoc(userRef,{xp:0,level:1,prestige:data.prestige+1})
+loadUserData()
 })
 
-/* FOLDERS WITH COLLAPSIBLE NOTES */
+// FOLDERS
 async function loadFolders(){
-  const q=query(collection(db,"folders"),where("owner","==",user.uid))
-  onSnapshot(q, snap=>{
-    foldersDiv.innerHTML=""
-    snap.forEach(async f=>{
-      const folderDiv = document.createElement("div")
-      folderDiv.className="folder"
-      folderDiv.style.cursor="pointer"
-      folderDiv.innerHTML = "▶ "+f.data().name
-      const notesList = document.createElement("div")
-      notesList.style.marginLeft="15px"
-      notesList.style.display="none"
-      folderDiv.appendChild(notesList)
-      folderDiv.addEventListener("click", async ()=>{
-        if(notesList.style.display==="none"){
-          folderDiv.innerHTML = "▼ "+f.data().name
-          folderDiv.appendChild(notesList)
-          await loadNotes(f.id, notesList)
-          notesList.style.display="block"
-        } else {
-          folderDiv.innerHTML = "▶ "+f.data().name
-          folderDiv.appendChild(notesList)
-          notesList.style.display="none"
-        }
-      })
-      foldersDiv.appendChild(folderDiv)
-    })
-  })
+const q=query(collection(db,"folders"),where("owner","==",user.uid))
+onSnapshot(q,snap=>{
+foldersDiv.innerHTML=""
+snap.forEach(f=>{
+const folderDiv=document.createElement("div")
+folderDiv.className="folder"
+folderDiv.innerHTML="▶ "+f.data().name
+const notesList=document.createElement("div")
+notesList.style.marginLeft="15px"
+notesList.style.display="none"
+folderDiv.appendChild(notesList)
+folderDiv.addEventListener("click", async e=>{
+if(e.target.classList.contains("note")) return // click on note shouldn't toggle
+if(notesList.style.display==="none"){
+folderDiv.innerHTML="▼ "+f.data().name
+folderDiv.appendChild(notesList)
+await loadNotes(f.id,notesList)
+notesList.style.display="block"
+} else {
+folderDiv.innerHTML="▶ "+f.data().name
+folderDiv.appendChild(notesList)
+notesList.style.display="none"
+}
+})
+foldersDiv.appendChild(folderDiv)
+})
+})
 }
 
-/* LOAD NOTES INTO FOLDER */
-async function loadNotes(folderId, notesList){
-  const q = query(collection(db,"notes"), where("folder","==",folderId))
-  onSnapshot(q, snap=>{
-    notesList.innerHTML=""
-    snap.forEach(n=>{
-      const noteDiv = document.createElement("div")
-      noteDiv.className="note"
-      noteDiv.innerText = n.data().title
-      noteDiv.style.marginLeft="10px"
-      noteDiv.onclick = (e)=>{
-        e.stopPropagation()
-        openNote(n.id)
-      }
-      notesList.appendChild(noteDiv)
-    })
-  })
+// LOAD NOTES
+async function loadNotes(folderId,notesList){
+const q=query(collection(db,"notes"),where("folder","==",folderId))
+onSnapshot(q,snap=>{
+notesList.innerHTML=""
+snap.forEach(n=>{
+const noteDiv=document.createElement("div")
+noteDiv.className="note"
+noteDiv.innerText=n.data().title
+noteDiv.style.marginLeft="10px"
+noteDiv.addEventListener("click", e=>{
+e.stopPropagation()
+openNote(n.id)
+})
+notesList.appendChild(noteDiv)
+})
+})
 }
 
-/* NEW NOTE */
+// NEW NOTE
 async function newNote(){
-  if(!currentFolder) return alert("Select a folder first")
-  const ref=await addDoc(collection(db,"notes"),{
-    owner:user.uid,
-    folder:currentFolder,
-    title:"Untitled",
-    content:""
-  })
-  currentNote=ref.id
-  editor.innerHTML=""
-  titleInput.value=""
-  newBlock()
+if(!currentFolder) return alert("Select a folder first")
+const ref=await addDoc(collection(db,"notes"),{owner:user.uid,folder:currentFolder,title:"Untitled",content:""})
+currentNote=ref.id
+editor.innerHTML=""
+titleInput.value=""
+newBlock()
 }
 
-/* OPEN NOTE */
+// OPEN NOTE
 async function openNote(id){
-  currentNote=id
-  const snap = await getDoc(doc(db,"notes",id))
-  const data = snap.data()
-  titleInput.value=data.title
-  editor.innerHTML=data.content
+currentNote=id
+const snap=await getDoc(doc(db,"notes",id))
+const data=snap.data()
+titleInput.value=data.title
+editor.innerHTML=data.content
+newBlock() // Ensure editable
 }
 
-/* BLOCK EDITOR */
+// BLOCK EDITOR
 function newBlock(text=""){
-  const div=document.createElement("div")
-  div.className="block"
-  div.contentEditable=true
-  div.innerText=text
-  div.addEventListener("keydown",handleBlockKeys)
-  editor.appendChild(div)
-  div.focus()
+const div=document.createElement("div")
+div.className="block"
+div.contentEditable=true
+div.innerText=text
+div.addEventListener("keydown",handleBlockKeys)
+editor.appendChild(div)
+div.focus()
 }
 function handleBlockKeys(e){
-  const block=e.target
-  if(e.key==="Enter"){ e.preventDefault(); newBlock(); saveNote() }
-  if(e.key==="Backspace" && block.innerText===""){ block.remove(); saveNote() }
-  if(block.innerText.startsWith("/")) slashCommand(block)
-  markdownParse(block)
+const block=e.target
+if(e.key==="Enter"){ e.preventDefault(); newBlock(); saveNote() }
+if(e.key==="Backspace"&&block.innerText===""){ block.remove(); saveNote() }
+if(block.innerText.startsWith("/")) slashCommand(block)
+markdownParse(block)
 }
 function slashCommand(block){
-  const cmd=block.innerText.trim()
-  if(cmd==="/h1") block.outerHTML="<h1 class='block' contenteditable>Header</h1>"
-  if(cmd==="/h2") block.outerHTML="<h2 class='block' contenteditable>Header</h2>"
-  if(cmd==="/quote") block.outerHTML="<blockquote class='block' contenteditable>Quote</blockquote>"
-  if(cmd==="/todo") block.outerHTML="<div class='block'><input type='checkbox'> Todo</div>"
+const cmd=block.innerText.trim()
+if(cmd==="/h1") block.outerHTML="<h1 class='block' contenteditable>Header</h1>"
+if(cmd==="/h2") block.outerHTML="<h2 class='block' contenteditable>Header</h2>"
+if(cmd==="/quote") block.outerHTML="<blockquote class='block' contenteditable>Quote</blockquote>"
+if(cmd==="/todo") block.outerHTML="<div class='block'><input type='checkbox'> Todo</div>"
 }
 function markdownParse(block){
-  let t=block.innerText
-  if(t.startsWith("# ")) block.outerHTML="<h1 class='block' contenteditable>"+t.slice(2)+"</h1>"
-  if(t.startsWith("## ")) block.outerHTML="<h2 class='block' contenteditable>"+t.slice(3)+"</h2>"
-  if(t.startsWith("> ")) block.outerHTML="<blockquote class='block' contenteditable>"+t.slice(2)+"</blockquote>"
+let t=block.innerText
+if(t.startsWith("# ")) block.outerHTML="<h1 class='block' contenteditable>"+t.slice(2)+"</h1>"
+if(t.startsWith("## ")) block.outerHTML="<h2 class='block' contenteditable>"+t.slice(3)+"</h2>"
+if(t.startsWith("> ")) block.outerHTML="<blockquote class='block' contenteditable>"+t.slice(2)+"</blockquote>"
 }
 newBlock()
 editor.addEventListener("input",saveNote)
 titleInput.addEventListener("input",saveNote)
 
-/* SAVE & XP / LEVEL / PRESTIGE */
+// SAVE & XP
 async function saveNote(){
-  if(!currentNote) return
-  await updateDoc(doc(db,"notes",currentNote),{
-    title:titleInput.value,
-    content:editor.innerHTML
-  })
-  const words = editor.innerText.split(/\s+/).filter(Boolean).length
-  const userRef = doc(db,"users",user.uid)
-  const snap = await getDoc(userRef)
-  let data = snap.data()
-  let xpGain = words*(1+data.prestige*0.1)
-  let newXP = data.xp + xpGain
-  let newLevel = data.level
-  let threshold = 100*newLevel
-  if(newXP>=threshold){ newLevel++; newXP-=threshold }
-  await updateDoc(userRef,{xp:newXP, level:newLevel})
-  loadUserData()
+if(!currentNote) return
+await updateDoc(doc(db,"notes",currentNote),{title:titleInput.value,content:editor.innerHTML})
+const words=editor.innerText.split(/\s+/).filter(Boolean).length
+const userRef=doc(db,"users",user.uid)
+const snap=await getDoc(userRef)
+let data=snap.data()
+let xpGain=words*(1+data.prestige*0.1)
+let newXP=data.xp+xpGain
+let newLevel=data.level
+let threshold=100*newLevel
+if(newXP>=threshold){ newLevel++; newXP-=threshold }
+await updateDoc(userRef,{xp:newXP,level:newLevel})
+loadUserData()
 }
 
-/* CHAT */
+// CHAT
 function initChat(){
-  onChildAdded(ref(rtdb,"messages"), snap=>{
-    const m=snap.val()
-    const div=document.createElement("div")
-    div.className="chat-msg"
-    div.innerText=m.sender+": "+m.text
-    chatHistory.appendChild(div)
-    chatHistory.scrollTop=chatHistory.scrollHeight
-  })
-  chatInput.addEventListener("keypress",e=>{
-    if(e.key==="Enter"){
-      push(ref(rtdb,"messages"),{
-        sender:user.email.split("@")[0],
-        text:chatInput.value
-      })
-      chatInput.value=""
-    }
-  })
+onChildAdded(ref(rtdb,"messages"), snap=>{
+const m=snap.val()
+const div=document.createElement("div")
+div.className="chat-msg"
+div.innerText=m.sender+": "+m.text
+chatHistory.appendChild(div)
+chatHistory.scrollTop=chatHistory.scrollHeight
+})
+chatInput.addEventListener("keypress",e=>{
+if(e.key==="Enter"){ push(ref(rtdb,"messages"),{sender:user.email.split("@")[0],text:chatInput.value}); chatInput.value=""}
+})
 }
 
-/* STORE */
+// STORE
 async function loadStore(){
-  const snap = await getDocs(collection(db,"store"))
-  storeDiv.innerHTML=""
-  snap.forEach(d=>{
-    const item=d.data()
-    if(item.stock<=0) return
-    const div=document.createElement("div")
-    div.className="item"
-    div.innerHTML=d.id+"<br>"+item.price+" credits"
-    storeDiv.appendChild(div)
-  })
+const snap=await getDocs(collection(db,"store"))
+storeDiv.innerHTML=""
+snap.forEach(d=>{
+const item=d.data()
+if(item.stock<=0) return
+const div=document.createElement("div")
+div.className="item"
+div.innerHTML=d.id+"<br>"+item.price+" credits"
+storeDiv.appendChild(div)
+})
 }
 
-/* LEADERBOARD */
+// LEADERBOARD
 async function loadLeaderboard(){
-  const snap = await getDocs(query(collection(db,"users"),orderBy("xp","desc")))
-  leaderboardDiv.innerHTML=""
-  snap.forEach(d=>{
-    const u=d.data()
-    const row=document.createElement("div")
-    row.innerText=u.email+" "+u.xp+" XP"
-    leaderboardDiv.appendChild(row)
-  })
+const snap=await getDocs(query(collection(db,"users"),orderBy("xp","desc")))
+leaderboardDiv.innerHTML=""
+snap.forEach(d=>{
+const u=d.data()
+const row=document.createElement("div")
+row.innerText=u.email+" "+u.xp+" XP"
+leaderboardDiv.appendChild(row)
+})
 }
 
-/* VIEW SWITCH */
+// VIEW SWITCH
 function show(v){
-  document.getElementById("notesView").classList.add("hidden")
-  document.getElementById("chatView").classList.add("hidden")
-  document.getElementById("storeView").classList.add("hidden")
-  document.getElementById("leaderboardView").classList.add("hidden")
-  if(v=="notes") document.getElementById("notesView").classList.remove("hidden")
-  if(v=="chat") document.getElementById("chatView").classList.remove("hidden")
-  if(v=="store") document.getElementById("storeView").classList.remove("hidden")
-  if(v=="leaderboard") document.getElementById("leaderboardView").classList.remove("hidden")
+document.getElementById("notesView").classList.add("hidden")
+document.getElementById("chatView").classList.add("hidden")
+document.getElementById("storeView").classList.add("hidden")
+document.getElementById("leaderboardView").classList.add("hidden")
+if(v=="notes") document.getElementById("notesView").classList.remove("hidden")
+if(v=="chat") document.getElementById("chatView").classList.remove("hidden")
+if(v=="store") document.getElementById("storeView").classList.remove("hidden")
+if(v=="leaderboard") document.getElementById("leaderboardView").classList.remove("hidden")
 }
 </script>
 </body>
