@@ -422,7 +422,7 @@ window.sellNotePages=async()=>{
   await updateDoc(doc(db,"users",currentUser.uid),{credits:(myData.credits||0)+credits})
   alert("Sold "+pages+" pages")
 }
-  import { collection, getDocs, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+  
 
 const storeGrid = document.getElementById("store-grid");
 
