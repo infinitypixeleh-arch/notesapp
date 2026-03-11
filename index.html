@@ -368,7 +368,67 @@ document.getElementById("login-btn").onclick = async ()=>{
     }catch(err){alert("Auth failed: "+err.message)}
   }
 }
+let totalXP = myData.wordCount || 0; // use wordCount as total XP
 
+richEditor.addEventListener('input', async () => {
+  if(!currentUser) return;
+
+  const text = richEditor.innerText || "";
+  const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+
+  const newXP = words - (myData.wordCount || 0);
+  if(newXP > 0){
+    totalXP += newXP;
+
+    // Calculate new level
+    const lvlData = calculateLevelFromXP(totalXP);
+    let newPrestige = myData.prestige || 0;
+    if(lvlData.level >= 50 && (myData.level || 1) < 50){
+      newPrestige++; // first time hitting 50
+    }
+
+    // Update Firestore
+    await updateDoc(doc(db,"users",currentUser.uid),{
+      wordCount: totalXP,
+      level: lvlData.level,
+      prestige: newPrestige
+    });
+
+    // Update local UI
+    myData.wordCount = totalXP;
+    myData.level = lvlData.level;
+    myData.prestige = newPrestige;
+    updateStatsUI();
+  }
+});
+
+  function calculateLevelFromXP(totalXP){
+  let level = 1;
+  let xpForNext = 100; // Level 1 → 2
+  let remainingXP = totalXP;
+
+  while(remainingXP >= xpForNext){
+    remainingXP -= xpForNext;
+    level++;
+    xpForNext = Math.floor(xpForNext * 1.1);
+  }
+
+  return { 
+    level: level, 
+    currentXP: remainingXP, 
+    nextLevelXP: xpForNext 
+  };
+}
+  let lastWordCount = 0;
+richEditor.addEventListener('input', () => {
+  const text = richEditor.innerText || "";
+  const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+  const newWords = words - lastWordCount;
+  if(newWords > 0){
+    lastWordCount = words;
+    updateUserStats(newWords); // <-- increments XP and level
+  }
+});
 // --- UI Updates ---
 function updateUserUI(){
   lvText.textContent = "LVL "+(myData.level||1)
