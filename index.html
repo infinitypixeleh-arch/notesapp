@@ -350,7 +350,7 @@ onAuthStateChanged(auth, async (user) => {
 
     loadFolders();
     initChat();
-    storeItems();
+    s();
   }
 });
 
@@ -548,19 +548,25 @@ window.prevPage=()=>{
 // --- Store ---
 async function storeItems(){
   const snap = await getDocs(collection(db,"store"));
-  storeGrid.innerHTML="";
-  snap.forEach(doc=>{
+  const storeGrid = document.querySelector(".store-grid");
+  storeGrid.innerHTML = "";
+
+  snap.forEach(doc => {
     const item = doc.data();
     const card = document.createElement("div");
     card.className = "store-card";
     card.innerHTML = `<strong>${item.name}</strong><span>${item.price} 💰</span>`;
-    card.onclick = ()=>{
-      if(item.type === "color") buyColor(doc.id);
-      if(item.type === "tag") buyTag(doc.id);
-      if(item.type === "sellPages") sellNotePages();
+    
+    card.onclick = async () => {
+      if(item.type === "color") await buyColor(doc.id);
+      if(item.type === "tag") await buyTag(doc.id);
+      if(item.type === "sellPages") await sellNotePages();
     }
+
     storeGrid.appendChild(card);
   });
+
+  // Auto-update when store changes
   onSnapshot(collection(db,"store"),()=>storeItems());
 }
 // Buy a color
