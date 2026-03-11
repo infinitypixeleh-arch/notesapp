@@ -336,23 +336,6 @@ const credsEl = document.getElementById("my-creds");
 const richEditor = document.getElementById("rich-editor");
 const storeGrid = document.querySelector(".store-grid");
 
-// --- Auth ---
-onAuthStateChanged(auth, async (user) => {
-  if(user){
-    currentUser = user;
-    document.getElementById("auth-overlay").style.display = "none";
-
-    onSnapshot(doc(db,"users",user.uid),(snap)=>{
-      myData = snap.data()||{};
-      updateUserUI();
-      updateStatsUI();
-    });
-
-    loadFolders();
-    initChat();
-    s();
-  }
-});
 
   onAuthStateChanged(auth, async (user) => {
   if(user){
@@ -368,6 +351,7 @@ onAuthStateChanged(auth, async (user) => {
     loadFolders();
     initChat();
     storeItems(); // <-- call this to load market
+    s()
   }
 });
 document.getElementById("login-btn").onclick = async ()=>{
