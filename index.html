@@ -163,34 +163,52 @@ loadUserData()
 })
 
 // FOLDERS
-async function loadFolders(){
-const q=query(collection(db,"folder"),where("owner","==",user.uid))
-onSnapshot(q,snap=>{
-foldersDiv.innerHTML=""
-snap.forEach(f=>{
-const folderDiv=document.createElement("div")
-folderDiv.className="folder"
-folderDiv.innerHTML="▶ "+f.data().name
-const notesList=document.createElement("div")
-notesList.style.marginLeft="15px"
-notesList.style.display="none"
-folderDiv.appendChild(notesList)
-folderDiv.addEventListener("click", async e=>{
-if(e.target.classList.contains("note")) return // click on note shouldn't toggle
-if(notesList.style.display==="none"){
-folderDiv.innerHTML="▼ "+f.data().name
-folderDiv.appendChild(notesList)
-await loadNotes(f.id,notesList)
-notesList.style.display="block"
-} else {
-folderDiv.innerHTML="▶ "+f.data().name
-folderDiv.appendChild(notesList)
-notesList.style.display="none"
-}
-})
-foldersDiv.appendChild(folderDiv)
-})
-})
+async function loadFolders() {
+  const notesSnap = await getDocs(query(collection(db, "notes"), where("owner", "==", user.uid)))
+  const foldersMap = {} // key = folder name, value = array of note objects
+
+  notesSnap.forEach(noteDoc => {
+    const note = noteDoc.data()
+    const folderName = note.folder || "General" // default folder if empty
+    if (!foldersMap[folderName]) foldersMap[folderName] = []
+    foldersMap[folderName].push({ id: noteDoc.id, title: note.title })
+  })
+
+  foldersDiv.innerHTML = "" // clear existing folders
+
+  Object.keys(foldersMap).forEach(folderName => {
+    const folderDiv = document.createElement("div")
+    folderDiv.className = "folder"
+    folderDiv.innerText = "▶ " + folderName
+    const notesList = document.createElement("div")
+    notesList.style.marginLeft = "15px"
+    notesList.style.display = "none"
+
+    folderDiv.addEventListener("click", () => {
+      if (notesList.style.display === "none") {
+        folderDiv.innerText = "▼ " + folderName
+        notesList.style.display = "block"
+      } else {
+        folderDiv.innerText = "▶ " + folderName
+        notesList.style.display = "none"
+      }
+    })
+
+    // Add notes under this folder
+    foldersMap[folderName].forEach(note => {
+      const noteDiv = document.createElement("div")
+      noteDiv.className = "note"
+      noteDiv.innerText = note.title
+      noteDiv.addEventListener("click", e => {
+        e.stopPropagation() // prevent collapsing folder
+        openNote(note.id)
+      })
+      notesList.appendChild(noteDiv)
+    })
+
+    folderDiv.appendChild(notesList)
+    foldersDiv.appendChild(folderDiv)
+  })
 }
 
 // LOAD NOTES
@@ -213,13 +231,19 @@ notesList.appendChild(noteDiv)
 }
 
 // NEW NOTE
-async function newNote(){
-if(!currentFolder) return alert("Select a folder first")
-const ref=await addDoc(collection(db,"notes"),{owner:user.uid,folder:currentFolder,title:"Untitled",content:""})
-currentNote=ref.id
-editor.innerHTML=""
-titleInput.value=""
-newBlock()
+async function newNote(folderName) {
+  if (!folderName) folderName = "General" // default
+  const ref = await addDoc(collection(db, "notes"), {
+    owner: user.uid,
+    folder: folderName,
+    title: "Untitled",
+    content: ""
+  })
+  currentNote = ref.id
+  editor.innerHTML = ""
+  titleInput.value = ""
+  newBlock()
+  loadFolders() // refresh folders list
 }
 
 // OPEN NOTE
