@@ -69,6 +69,24 @@ aside h4{margin-bottom:5px;color:var(--accent);}
 }
 #folders-list div > div:hover{background:var(--hover-bg);}
 
+/* Sidebar Buttons */
+.sidebar-btn{
+  margin-top:10px;
+  padding:10px;
+  background:var(--accent);
+  color:#111;
+  border:none;
+  border-radius:6px;
+  font-weight:600;
+  width:100%;
+  cursor:pointer;
+  transition:0.2s;
+}
+.sidebar-btn:hover{
+  transform:scale(1.05);
+  background:#b39aff;
+}
+
 /* Views */
 .view-container{
   flex:1;
@@ -79,6 +97,23 @@ aside h4{margin-bottom:5px;color:var(--accent);}
 }
 .view{display:none;flex-direction:column;height:100%;}
 .view.active{display:flex;}
+
+/* Editor Toolbar */
+.editor-toolbar{
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
+}
+.editor-toolbar button{
+  padding:6px 10px;
+  background:#222;
+  color:#eee;
+  border-radius:6px;
+  border:1px solid var(--border);
+  cursor:pointer;
+  transition:0.2s;
+}
+.editor-toolbar button:hover{background:var(--hover-bg);}
 
 /* Notes editor */
 #note-title{padding:10px;margin-bottom:10px;background:#222;color:#eee;border-radius:6px;border:1px solid var(--border);}
@@ -94,7 +129,7 @@ aside h4{margin-bottom:5px;color:var(--accent);}
   line-height:1.6;
 }
 .notes-controls{margin-top:10px;display:flex;gap:10px;justify-content:flex-end;}
-.notes-controls button{padding:10px 16px;background:var(--accent);color:#111;border-radius:6px;font-weight:600;transition:0.2s;}
+.notes-controls button{padding:10px 16px;background:var(--accent);color:#111;border-radius:6px;font-weight:600;transition:0.2s;cursor:pointer;}
 .notes-controls button:hover{transform:scale(1.05);}
 
 /* Pagination buttons */
@@ -122,7 +157,7 @@ aside h4{margin-bottom:5px;color:var(--accent);}
 }
 .chat-bar{display:flex;margin-top:10px;}
 #chat-in{flex:1;padding:10px;border-radius:6px;background:#222;color:#eee;margin-right:10px;border:1px solid var(--border);}
-#chat-send{padding:10px 16px;background:var(--accent);color:#111;font-weight:600;border-radius:6px;}
+#chat-send{padding:10px 16px;background:var(--accent);color:#111;font-weight:600;border-radius:6px;cursor:pointer;}
 
 /* Chat bubbles */
 .msg-bubble{
@@ -205,10 +240,10 @@ aside h4{margin-bottom:5px;color:var(--accent);}
   <div id="folder-root">
     <h4>Folders</h4>
     <div id="folders-list"></div>
-    <button onclick="createNewFolder()">+ New Folder</button>
+    <button onclick="createNewFolder()" class="sidebar-btn">+ New Folder</button>
   </div>
 
-  <button onclick="createNewNote()" style="margin-top:10px;">NEW NOTE</button>
+  <button onclick="createNewNote()" class="sidebar-btn">NEW NOTE</button>
 </aside>
 
 <!-- Main Content -->
@@ -217,10 +252,24 @@ aside h4{margin-bottom:5px;color:var(--accent);}
   <!-- Notes -->
   <div id="notes-view" class="view active">
     <input id="note-title" placeholder="Note Title">
+
+    <!-- Formatting Toolbar -->
+    <div class="editor-toolbar">
+      <button onclick="formatText('bold')"><b>B</b></button>
+      <button onclick="formatText('italic')"><i>I</i></button>
+      <button onclick="formatText('underline')"><u>U</u></button>
+      <button onclick="formatText('insertUnorderedList')">• List</button>
+      <button onclick="formatText('insertOrderedList')">1. List</button>
+      <button onclick="formatText('formatBlock','H1')">H1</button>
+      <button onclick="formatText('formatBlock','H2')">H2</button>
+      <button onclick="formatText('formatBlock','H3')">H3</button>
+    </div>
+
     <div id="rich-editor" contenteditable="true"></div>
     <div class="notes-controls">
       <button onclick="shareNote()">Share</button>
       <button onclick="summarizeNote()">Summarize</button>
+      <button onclick="deleteNote()" style="background:#ff7675;">Delete</button>
     </div>
     <div class="page-controls">
       <button onclick="prevPage()">Prev</button>
@@ -248,15 +297,7 @@ aside h4{margin-bottom:5px;color:var(--accent);}
   <!-- Store -->
   <div id="store-view" class="view">
     <h3>RARITY STORE</h3>
-    <div class="store-grid">
-      <div class="store-card" onclick="buyColor('#ff7675',50)">ROSE<span>50 💰</span></div>
-      <div class="store-card" onclick="buyColor('#55efc4',50)">MINT<span>50 💰</span></div>
-      <div class="store-card" onclick="buyColor('#74b9ff',50)">SKY<span>50 💰</span></div>
-      <div class="store-card" onclick="buyTag('DEV',0)">DEV TAG<span>0 💰</span></div>
-      <div class="store-card" onclick="buyTag('PRO',100)">PRO<span>100 💰</span></div>
-      <div class="store-card" onclick="buyTag('ELITE',150)">ELITE<span>150 💰</span></div>
-      <div class="store-card" onclick="sellNotePages()">SELL PAGES<span>25 💰 / 500 words</span></div>
-    </div>
+    <div class="store-grid"></div>
   </div>
 
 </div>
@@ -265,7 +306,7 @@ aside h4{margin-bottom:5px;color:var(--accent);}
 // --- Firebase imports ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"
 import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"
-import { getFirestore,doc,setDoc,collection,query,where,onSnapshot,addDoc,updateDoc,getDocs,orderBy,getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"
+import { getFirestore,doc,setDoc,collection,query,where,onSnapshot,addDoc,updateDoc,getDocs,orderBy,getDoc,deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"
 import { getDatabase,ref,push,onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"
 
 // --- Firebase config ---
@@ -285,15 +326,15 @@ const rtd=getDatabase(app)
 
 let currentUser=null
 let myData={}
+let currentNoteId = null
+let PAGE_SIZE=500, currentPage=0
 
 // DOM Elements
 const lvText = document.getElementById("my-lvl-text");
 const starsEl = document.getElementById("my-stars");
 const credsEl = document.getElementById("my-creds");
-const chatHistory = document.getElementById("chat-history");
-const chatIn = document.getElementById("chat-in");
-const leaderboardList = document.getElementById("leaderboard-list");
 const richEditor = document.getElementById("rich-editor");
+const storeGrid = document.querySelector(".store-grid");
 
 // --- Auth ---
 onAuthStateChanged(auth, async (user) => {
@@ -309,6 +350,7 @@ onAuthStateChanged(auth, async (user) => {
 
     loadFolders();
     initChat();
+    storeItems();
   }
 });
 
@@ -375,22 +417,40 @@ window.createNewFolder = async()=>{
 }
 
 window.createNewNote = async()=>{
-  await addDoc(collection(db,"notes"),{
+  const docRef = await addDoc(collection(db,"notes"),{
     title:"UNTITLED", content:"", access:[currentUser.uid], owner:currentUser.uid
   });
   loadFolders();
 }
 
 async function loadNote(noteId){
+  currentNoteId = noteId;
   const noteSnap = await getDoc(doc(db,"notes",noteId));
   const noteData = noteSnap.data();
   document.getElementById("note-title").value = noteData.title;
-  richEditor.innerText = noteData.content||"";
+  richEditor.innerHTML = noteData.content||"";
   currentPage = 0;
 }
 
+// Delete Note
+window.deleteNote = async()=>{
+  if(!currentNoteId) return alert("No note selected");
+  if(confirm("Are you sure you want to delete this note?")){
+    await deleteDoc(doc(db,"notes",currentNoteId));
+    currentNoteId = null;
+    richEditor.innerHTML = "";
+    document.getElementById("note-title").value = "";
+    loadFolders();
+  }
+}
+
+// --- Rich Text Formatting ---
+window.formatText = (cmd,value=null)=>{ document.execCommand(cmd,false,value); richEditor.focus(); }
+
 // --- Chat ---
 function initChat(){
+  const chatHistory = document.getElementById("chat-history");
+  const chatIn = document.getElementById("chat-in");
   onChildAdded(ref(rtd,'messages'),(snap)=>{
     const m = snap.val();
     const div = document.createElement("div");
@@ -400,19 +460,18 @@ function initChat(){
     chatHistory.appendChild(div);
     chatHistory.scrollTop = chatHistory.scrollHeight;
   });
-}
-if(chatIn) document.getElementById("chat-send").onclick = ()=>{
-  const t = chatIn.value;
-  if(!t) return;
-  push(ref(rtd,'messages'),{
-    uid:currentUser.uid, sender:currentUser.email.split("@")[0],
-    text:t, prestige:myData.prestige||0, tag:myData.activeTag||"", color:myData.color||"#888"
-  });
-  chatIn.value="";
+  if(chatIn) document.getElementById("chat-send").onclick = ()=>{
+    const t = chatIn.value;
+    if(!t) return;
+    push(ref(rtd,'messages'),{
+      uid:currentUser.uid, sender:currentUser.email.split("@")[0],
+      text:t, prestige:myData.prestige||0, tag:myData.activeTag||"", color:myData.color||"#888"
+    });
+    chatIn.value="";
+  }
 }
 
 // --- Notes Pagination ---
-let PAGE_SIZE=500, currentPage=0;
 window.nextPage=()=>{
   const words = richEditor.innerText.split(/\s+/)
   const pages=[]
@@ -427,6 +486,24 @@ window.prevPage=()=>{
 }
 
 // --- Store ---
+async function storeItems(){
+  const snap = await getDocs(collection(db,"store"));
+  storeGrid.innerHTML="";
+  snap.forEach(doc=>{
+    const item = doc.data();
+    const card = document.createElement("div");
+    card.className = "store-card";
+    card.innerHTML = `<strong>${item.name}</strong><span>${item.price} 💰</span>`;
+    card.onclick = ()=>{
+      if(item.type==="color") buyColor(item.value,item.price);
+      if(item.type==="tag") buyTag(item.value,item.price);
+      if(item.type==="sellPages") sellNotePages();
+    }
+    storeGrid.appendChild(card);
+  });
+  onSnapshot(collection(db,"store"),()=>storeItems());
+}
+
 window.buyColor = async (color,price)=>{
   if((myData.credits||0)<price) return alert("Not enough credits")
   await updateDoc(doc(db,"users",currentUser.uid),{color:color, credits:(myData.credits||0)-price})
@@ -449,6 +526,7 @@ window.sellNotePages = async ()=>{
 // --- Leaderboard ---
 window.renderLeaderboard = async ()=>{
   window.showView("leaderboard-view")
+  const leaderboardList = document.getElementById("leaderboard-list");
   const snap = await getDocs(query(collection(db,"users"),orderBy("wordCount","desc")))
   leaderboardList.innerHTML=""
   snap.forEach(d=>{
