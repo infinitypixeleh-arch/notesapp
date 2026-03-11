@@ -495,25 +495,61 @@ async function storeItems(){
     card.className = "store-card";
     card.innerHTML = `<strong>${item.name}</strong><span>${item.price} 💰</span>`;
     card.onclick = ()=>{
-      if(item.type==="color") buyColor(item.value,item.price);
-      if(item.type==="tag") buyTag(item.value,item.price);
-      if(item.type==="sellPages") sellNotePages();
+      if(item.type === "color") buyColor(doc.id);
+      if(item.type === "tag") buyTag(doc.id);
+      if(item.type === "sellPages") sellNotePages();
     }
     storeGrid.appendChild(card);
   });
   onSnapshot(collection(db,"store"),()=>storeItems());
 }
+// Buy a color
+window.buyColor = async (itemId)=>{
+  const itemRef = doc(db,"store",itemId);
+  const itemSnap = await getDoc(itemRef);
+  const item = itemSnap.data();
 
-window.buyColor = async (color,price)=>{
-  if((myData.credits||0)<price) return alert("Not enough credits")
-  await updateDoc(doc(db,"users",currentUser.uid),{color:color, credits:(myData.credits||0)-price})
+  if((myData.credits||0) < item.price) return alert("Not enough credits");
+  
+  await updateDoc(doc(db,"users",currentUser.uid),{
+    color: item.value,
+    credits: (myData.credits||0) - item.price
+  });
+
+  alert(`Purchased ${item.name}!`);
 }
-const TAG_SUPPLY={DEV:1,PRO:10,ELITE:5}
-window.buyTag = async(tag,price)=>{
-  if(TAG_SUPPLY[tag]<=0) return alert("Tag sold out")
-  if((myData.credits||0)<price) return alert("Not enough credits")
-  TAG_SUPPLY[tag]--
-  await updateDoc(doc(db,"users",currentUser.uid),{activeTag:tag, credits:(myData.credits||0)-price})
+
+// Buy a tag
+window.buyTag = async (itemId)=>{
+  const itemRef = doc(db,"store",itemId);
+  const itemSnap = await getDoc(itemRef);
+  const item = itemSnap.data();
+
+  if(item.stock <= 0) return alert("Item sold out");
+  if((myData.credits||0) < item.price) return alert("Not enough credits");
+
+  // Deduct stock
+  await updateDoc(itemRef, { stock: item.stock - 1 });
+
+  await updateDoc(doc(db,"users",currentUser.uid),{
+    activeTag: item.value,
+    credits: (myData.credits||0) - item.price
+  });
+
+  alert(`Purchased ${item.name}!`);
+}
+
+// Sell pages
+window.sellNotePages = async ()=>{
+  const words = richEditor.innerText.split(/\s+/).length
+  const pages = Math.floor(words/500)
+  if(pages <= 0) return alert("Not enough words to sell");
+
+  const credits = pages*25
+  await updateDoc(doc(db,"users",currentUser.uid),{
+    credits: (myData.credits||0) + credits
+  })
+  alert("Sold "+pages+" pages")
 }
 window.sellNotePages = async ()=>{
   const words = richEditor.innerText.split(/\s+/).length
