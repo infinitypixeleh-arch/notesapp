@@ -2,363 +2,476 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfNotes</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-body {margin:0;font-family:Inter,sans-serif;background:#0b0b0e;color:#e6e6ea;display:flex;height:100vh;overflow:hidden;}
-aside {width:280px;background:#141418;border-right:1px solid #222;padding:20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
-aside h2 { margin:0 0 10px 0;}
-.user-stats { font-size:14px;margin-bottom:10px;line-height:1.4;}
-.button-group { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;}
-.button-group button { flex:1 1 48%; padding:8px; border:none; border-radius:6px; background:#1a1a21; color:white; cursor:pointer; transition:0.2s;}
-.button-group button:hover { background:#2a2a33;}
-#newFolderBtn, #prestigeBtn { width:100%; padding:8px; margin:5px 0; border:none; border-radius:6px; background:#1a1a21; color:white; cursor:pointer; transition:0.2s;}
-#newFolderBtn:hover, #prestigeBtn:hover { background:#2a2a33; }
-.folder { font-weight:bold; margin-top:10px; cursor:pointer; user-select:none;}
-.note { padding:6px 6px 6px 12px; cursor:pointer; border-radius:6px; user-select:none;}
-.note:hover { background:#1c1c22;}
-main { flex:1; display:flex; flex-direction:column; padding:20px; overflow-y:auto;}
-#editor { flex:1; background:#141419; border:1px solid #2a2a33; border-radius:10px; padding:20px; overflow-y:auto; min-height:200px;}
-.block { padding:6px; outline:none; }
-.block:hover { background:#1b1b22;}
-input { width:100%; background:#1a1a21; border:1px solid #333; color:white; padding:8px; border-radius:6px; margin-bottom:10px; }
-.chat-msg { background:#1a1a22; padding:8px; margin:4px 0; border-radius:6px;}
-.store { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px;}
-.item { background:#15151c; border:1px solid #222; padding:10px; border-radius:6px; text-align:center; cursor:pointer;}
-.hidden { display:none;}
+:root{
+  --bg:#0a0a0a;
+  --panel:#111;
+  --accent:#a29bfe;
+  --text:#ccc;
+  --text-focus:#fff;
+  --border:#222;
+  --sidebar-w:250px;
+  --card-bg:rgba(20,20,20,0.8);
+  --card-shadow:0 6px 20px rgba(0,0,0,0.6);
+  --hover-bg:rgba(160,155,254,0.15);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* Sidebar */
+aside{
+  width:var(--sidebar-w);
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  padding:30px 20px;
+  display:flex;
+  flex-direction:column;
+  overflow-y:auto;
+}
+aside h4{margin-bottom:5px;color:var(--accent);}
+#my-lvl-text{font-weight:600;margin-bottom:5px;font-size:1.1rem;}
+#my-stars{color:#fdcb6e;margin-bottom:5px;}
+#my-creds{color:#00d2d3;margin-bottom:15px;}
+.nav-item{
+  padding:10px 12px;
+  margin:5px 0;
+  cursor:pointer;
+  font-size:0.85rem;
+  border-radius:6px;
+  transition:0.2s;
+}
+.nav-item:hover{
+  background:var(--accent);
+  color:#111;
+  font-weight:500;
+}
+
+/* Folder List */
+#folders-list div{margin-bottom:8px;}
+#folders-list div > div{
+  cursor:pointer;
+  padding:6px 8px;
+  border-radius:5px;
+  margin:2px 0;
+  transition:0.2s;
+}
+#folders-list div > div:hover{background:var(--hover-bg);}
+
+/* Views */
+.view-container{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  padding:20px;
+  overflow:hidden;
+}
+.view{display:none;flex-direction:column;height:100%;}
+.view.active{display:flex;}
+
+/* Notes editor */
+#note-title{padding:10px;margin-bottom:10px;background:#222;color:#eee;border-radius:6px;border:1px solid var(--border);}
+#rich-editor{
+  flex:1;
+  padding:20px;
+  background:var(--card-bg);
+  border-radius:12px;
+  color:#eee;
+  border:1px solid var(--border);
+  box-shadow:var(--card-shadow);
+  overflow-y:auto;
+  line-height:1.6;
+}
+.notes-controls{margin-top:10px;display:flex;gap:10px;justify-content:flex-end;}
+.notes-controls button{padding:10px 16px;background:var(--accent);color:#111;border-radius:6px;font-weight:600;transition:0.2s;}
+.notes-controls button:hover{transform:scale(1.05);}
+
+/* Pagination buttons */
+.page-controls{
+  margin-top:10px;
+  display:flex;
+  justify-content:center;
+  gap:15px;
+}
+.page-controls button{
+  padding:8px 14px;
+  border-radius:6px;
+  background:var(--accent);
+  font-weight:600;
+  color:#111;
+  transition:0.2s;
+}
+.page-controls button:hover{transform:scale(1.05);}
+
+/* Chat */
+#chat-history{
+  flex:1;
+  overflow-y:auto;
+  padding:15px;
+}
+.chat-bar{display:flex;margin-top:10px;}
+#chat-in{flex:1;padding:10px;border-radius:6px;background:#222;color:#eee;margin-right:10px;border:1px solid var(--border);}
+#chat-send{padding:10px 16px;background:var(--accent);color:#111;font-weight:600;border-radius:6px;}
+
+/* Chat bubbles */
+.msg-bubble{
+  background:var(--card-bg);
+  padding:12px 18px;
+  border-radius:12px;
+  max-width:70%;
+  border:1px solid var(--border);
+  margin-bottom:8px;
+  word-wrap:break-word;
+  box-shadow:var(--card-shadow);
+}
+
+/* Stats / Leaderboard */
+#leaderboard-list div,#my-stats div{
+  padding:10px;
+  margin:5px 0;
+  background:var(--card-bg);
+  border-radius:10px;
+  box-shadow:var(--card-shadow);
+}
+
+/* Store */
+.store-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:20px;
+  margin-top:20px;
+}
+.store-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  padding:15px;
+  border-radius:12px;
+  text-align:center;
+  cursor:pointer;
+  transition:0.3s;
+  box-shadow:var(--card-shadow);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.store-card:hover{
+  transform:scale(1.05);
+  background:var(--hover-bg);
+}
+.store-card span{margin-top:8px;font-size:0.85rem;color:#aaa;font-weight:500;}
+
+/* Auth Overlay */
+#auth-overlay{position:fixed;inset:0;background:#050505;display:flex;align-items:center;justify-content:center;z-index:5000;}
+#auth-overlay input{width:100%;padding:12px;margin-bottom:10px;border-radius:6px;background:#222;color:#eee;border:1px solid var(--border);}
+#auth-overlay button{width:100%;padding:12px;background:var(--accent);color:#111;font-weight:600;border-radius:6px;cursor:pointer;transition:0.2s;}
+#auth-overlay button:hover{transform:scale(1.05);}
 </style>
 </head>
+
 <body>
 
+<!-- Auth -->
+<div id="auth-overlay">
+  <div style="width:320px;text-align:center">
+    <h1>INFNOTES</h1>
+    <input id="email" placeholder="Email">
+    <input id="pass" type="password" placeholder="Password">
+    <button id="login-btn">ENTER</button>
+  </div>
+</div>
+
+<!-- Sidebar -->
 <aside>
-<h2>InfNotes</h2>
-<div class="user-stats">
-Level: <span id="level">1</span><br>
-Prestige: <span id="prestige">0</span><br>
-XP: <span id="xp">0</span><br>
-Credits: <span id="credits">0</span>
-</div>
+  <div id="my-lvl-text">LVL 1</div>
+  <div id="my-stars">★</div>
+  <div id="my-creds">$0</div>
 
-<div class="button-group">
-<button id="notesBtn">Notes</button>
-<button id="chatBtn">Chat</button>
-<button id="storeBtn">Market</button>
-<button id="leaderboardBtn">Leaderboard</button>
-</div>
+  <div class="nav-item" onclick="showView('notes-view')">Notes</div>
+  <div class="nav-item" onclick="showView('stats-view')">My Stats</div>
+  <div class="nav-item" onclick="showView('leaderboard-view')">Leaderboard</div>
+  <div class="nav-item" onclick="showView('store-view')">Market</div>
 
-<hr>
-<button id="newFolderBtn">+ New Folder</button>
-<div id=""></div>
-<button id="prestigeBtn">Prestige</button>
+  <div id="folder-root">
+    <h4>Folders</h4>
+    <div id="folders-list"></div>
+    <button onclick="createNewFolder()">+ New Folder</button>
+  </div>
+
+  <button onclick="createNewNote()" style="margin-top:10px;">NEW NOTE</button>
 </aside>
 
-<main>
-<div id="notesView">
-<input id="title" placeholder="Title">
-<div id="editor"></div>
-</div>
+<!-- Main Content -->
+<div class="view-container">
 
-<div id="chatView" class="hidden">
-<div id="chatHistory" style="flex:1; overflow-y:auto;"></div>
-<input id="chatInput" placeholder="Type a message...">
-</div>
+  <!-- Notes -->
+  <div id="notes-view" class="view active">
+    <input id="note-title" placeholder="Note Title">
+    <div id="rich-editor" contenteditable="true"></div>
+    <div class="notes-controls">
+      <button onclick="shareNote()">Share</button>
+      <button onclick="summarizeNote()">Summarize</button>
+    </div>
+    <div class="page-controls">
+      <button onclick="prevPage()">Prev</button>
+      <button onclick="nextPage()">Next</button>
+    </div>
+  </div>
 
-<div id="storeView" class="hidden">
-<h3>Market</h3>
-<div id="store" class="store"></div>
-</div>
+  <!-- Stats -->
+  <div id="stats-view" class="view">
+    <h3>MY STATS</h3>
+    <div id="my-stats" style="display:flex;flex-direction:column;gap:10px">
+      <div>Level: <span id="stat-level">1</span></div>
+      <div>Prestige: <span id="stat-prestige">0</span></div>
+      <div>Credits: <span id="stat-credits">$0</span></div>
+      <div>Words Written: <span id="stat-words">0</span></div>
+    </div>
+  </div>
 
-<div id="leaderboardView" class="hidden">
-<h3>Leaderboard</h3>
-<div id="leaderboard"></div>
+  <!-- Leaderboard -->
+  <div id="leaderboard-view" class="view">
+    <h3>GLOBAL WORD LEADERBOARD</h3>
+    <div id="leaderboard-list"></div>
+  </div>
+
+  <!-- Store -->
+  <div id="store-view" class="view">
+    <h3>RARITY STORE</h3>
+    <div class="store-grid">
+      <div class="store-card" onclick="buyColor('#ff7675',50)">ROSE<span>50 💰</span></div>
+      <div class="store-card" onclick="buyColor('#55efc4',50)">MINT<span>50 💰</span></div>
+      <div class="store-card" onclick="buyColor('#74b9ff',50)">SKY<span>50 💰</span></div>
+      <div class="store-card" onclick="buyTag('DEV',0)">DEV TAG<span>0 💰</span></div>
+      <div class="store-card" onclick="buyTag('PRO',100)">PRO<span>100 💰</span></div>
+      <div class="store-card" onclick="buyTag('ELITE',150)">ELITE<span>150 💰</span></div>
+      <div class="store-card" onclick="sellNotePages()">SELL PAGES<span>25 💰 / 500 words</span></div>
+    </div>
+  </div>
+
 </div>
-</main>
 
 <script type="module">
+// --- Firebase imports ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"
 import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"
-import { getFirestore,doc,setDoc,getDoc,collection,addDoc,updateDoc,getDocs,query,where,orderBy,onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"
+import { getFirestore,doc,setDoc,collection,query,where,onSnapshot,addDoc,updateDoc,getDocs,orderBy,getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"
 import { getDatabase,ref,push,onChildAdded } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"
 
-const firebaseConfig={apiKey:"AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI",authDomain:"infnotes.firebaseapp.com",projectId:"infnotes",databaseURL:"https://infnotes-default-rtdb.asia-southeast1.firebasedatabase.app"}
+// --- Firebase config ---
+const firebaseConfig={
+  apiKey:"AIzaSyBfAii2ab63blH41Z4VvWZ0XvfydpZ99pI",
+  authDomain:"infnotes.firebaseapp.com",
+  projectId:"infnotes",
+  databaseURL:"https://infnotes-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  storageBucket:"infnotes.firebasestorage.app",
+  messagingSenderId:"976520833702",
+  appId:"1:976520833702:web:ce8aa0afc1a6131da7e267"
+}
 const app=initializeApp(firebaseConfig)
 const auth=getAuth(app)
 const db=getFirestore(app)
-const rtdb=getDatabase(app)
+const rtd=getDatabase(app)
 
-let user=null
-let currentNote=null
-let currentFolder=null
+let currentUser=null
+let myData={}
 
-// Elements
-const editor=document.getElementById("editor")
-const titleInput=document.getElementById("title")
-const foldersDiv=document.getElementById("folder")
-const chatInput=document.getElementById("chatInput")
-const chatHistory=document.getElementById("chatHistory")
-const storeDiv=document.getElementById("store")
-const leaderboardDiv=document.getElementById("leaderboard")
-const xpSpan=document.getElementById("xp")
-const levelSpan=document.getElementById("level")
-const prestigeSpan=document.getElementById("prestige")
-const creditsSpan=document.getElementById("credits")
-const newFolderBtn=document.getElementById("newFolderBtn")
-const prestigeBtn=document.getElementById("prestigeBtn")
-const notesBtn=document.getElementById("notesBtn")
-const chatBtn=document.getElementById("chatBtn")
-const storeBtn=document.getElementById("storeBtn")
-const leaderboardBtn=document.getElementById("leaderboardBtn")
+// DOM Elements
+const lvText = document.getElementById("my-lvl-text");
+const starsEl = document.getElementById("my-stars");
+const credsEl = document.getElementById("my-creds");
+const chatHistory = document.getElementById("chat-history");
+const chatIn = document.getElementById("chat-in");
+const leaderboardList = document.getElementById("leaderboard-list");
+const richEditor = document.getElementById("rich-editor");
 
-// AUTH
-async function login(email,password){
-try { await signInWithEmailAndPassword(auth,email,password) }
-catch { const cred=await createUserWithEmailAndPassword(auth,email,password)
-await setDoc(doc(db,"users",cred.user.uid),{email:email,xp:0,level:1,prestige:0,credits:0})}
-}
+// --- Auth ---
+onAuthStateChanged(auth, async (user) => {
+  if(user){
+    currentUser = user;
+    document.getElementById("auth-overlay").style.display = "none";
 
-onAuthStateChanged(auth,u=>{
-if(!u) return
-user=u
-loadUserData()
-loadFolders()
-loadStore()
-initChat()
-loadLeaderboard()
-})
+    onSnapshot(doc(db,"users",user.uid),(snap)=>{
+      myData = snap.data()||{};
+      updateUserUI();
+      updateStatsUI();
+    });
 
-// USER DATA
-async function loadUserData(){
-const docRef=doc(db,"users",user.uid)
-const snap=await getDoc(docRef)
-if(!snap.exists()) return
-const data=snap.data()
-xpSpan.innerText=Math.floor(data.xp)
-levelSpan.innerText=data.level
-prestigeSpan.innerText=data.prestige
-creditsSpan.innerText=data.credits
-}
+    loadFolders();
+    initChat();
+  }
+});
 
-// NAV BUTTONS
-notesBtn.addEventListener("click",()=>show("notes"))
-chatBtn.addEventListener("click",()=>show("chat"))
-storeBtn.addEventListener("click",()=>show("store"))
-leaderboardBtn.addEventListener("click",()=>show("leaderboard"))
-
-// NEW FOLDER
-newFolderBtn.addEventListener("click", async ()=>{
-const name=prompt("Folder Name")
-if(!name) return
-await addDoc(collection(db,"folder"),{owner:user.uid,name:name})
-})
-
-// PRESTIGE
-prestigeBtn.addEventListener("click",async()=>{
-const userRef=doc(db,"users",user.uid)
-const snap=await getDoc(userRef)
-let data=snap.data()
-let threshold=100*data.level
-if(data.xp<threshold) return alert("Reach max level to prestige!")
-await updateDoc(userRef,{xp:0,level:1,prestige:data.prestige+1})
-loadUserData()
-})
-
-// FOLDERS
-async function loadFolders() {
-  const notesSnap = await getDocs(query(collection(db, "notes"), where("owner", "==", user.uid)))
-  const foldersMap = {} // key = folder name, value = array of note objects
-
-  notesSnap.forEach(noteDoc => {
-    const note = noteDoc.data()
-    const folderName = note.folder || "General" // default folder if empty
-    if (!foldersMap[folderName]) foldersMap[folderName] = []
-    foldersMap[folderName].push({ id: noteDoc.id, title: note.title })
-  })
-
-  foldersDiv.innerHTML = "" // clear existing folders
-
-  Object.keys(foldersMap).forEach(folderName => {
-    const folderDiv = document.createElement("div")
-    folderDiv.className = "folder"
-    folderDiv.innerText = "▶ " + folderName
-    const notesList = document.createElement("div")
-    notesList.style.marginLeft = "15px"
-    notesList.style.display = "none"
-
-    folderDiv.addEventListener("click", () => {
-      if (notesList.style.display === "none") {
-        folderDiv.innerText = "▼ " + folderName
-        notesList.style.display = "block"
-      } else {
-        folderDiv.innerText = "▶ " + folderName
-        notesList.style.display = "none"
-      }
-    })
-
-    // Add notes under this folder
-    foldersMap[folderName].forEach(note => {
-      const noteDiv = document.createElement("div")
-      noteDiv.className = "note"
-      noteDiv.innerText = note.title
-      noteDiv.addEventListener("click", e => {
-        e.stopPropagation() // prevent collapsing folder
-        openNote(note.id)
+document.getElementById("login-btn").onclick = async ()=>{
+  const e=document.getElementById("email").value
+  const p=document.getElementById("pass").value
+  try{
+    await signInWithEmailAndPassword(auth,e,p)
+  }catch{
+    try{
+      const cred = await createUserWithEmailAndPassword(auth,e,p)
+      await setDoc(doc(db,"users",cred.user.uid),{
+        email:e,credits:0,prestige:0,wordCount:0,activeTag:"",color:"#888",level:1
       })
-      notesList.appendChild(noteDiv)
-    })
-
-    folderDiv.appendChild(notesList)
-    foldersDiv.appendChild(folderDiv)
-  })
+    }catch(err){alert("Auth failed: "+err.message)}
+  }
 }
 
-// LOAD NOTES
-async function loadNotes(folderId,notesList){
-const q=query(collection(db,"notes"),where("folder","==",folderId))
-onSnapshot(q,snap=>{
-notesList.innerHTML=""
-snap.forEach(n=>{
-const noteDiv=document.createElement("div")
-noteDiv.className="note"
-noteDiv.innerText=n.data().title
-noteDiv.style.marginLeft="10px"
-noteDiv.addEventListener("click", e=>{
-e.stopPropagation()
-openNote(n.id)
-})
-notesList.appendChild(noteDiv)
-})
-})
+// --- UI Updates ---
+function updateUserUI(){
+  lvText.textContent = "LVL "+(myData.level||1)
+  starsEl.textContent = "★".repeat(myData.prestige||0)
+  credsEl.textContent = "$"+(myData.credits||0)
+}
+function updateStatsUI(){
+  document.getElementById("stat-level").textContent = myData.level||1
+  document.getElementById("stat-prestige").textContent = myData.prestige||0
+  document.getElementById("stat-credits").textContent = "$"+(myData.credits||0)
+  document.getElementById("stat-words").textContent = myData.wordCount||0
 }
 
-// NEW NOTE
-async function newNote(folderName) {
-  if (!folderName) folderName = "General" // default
-  const ref = await addDoc(collection(db, "notes"), {
-    owner: user.uid,
-    folder: folderName,
-    title: "Untitled",
-    content: ""
-  })
-  currentNote = ref.id
-  editor.innerHTML = ""
-  titleInput.value = ""
-  newBlock()
-  loadFolders() // refresh folders list
+// --- Notes / Folders ---
+async function loadFolders(){
+  const snap = await getDocs(query(collection(db,"notes"), where("access","array-contains",currentUser.uid)));
+  const folderList = document.getElementById("folders-list");
+  folderList.innerHTML = "";
+  const folders = {};
+  snap.forEach(doc=>{
+    const note = doc.data();
+    const folder = note.folder || "General";
+    if(!folders[folder]) folders[folder] = [];
+    folders[folder].push({id:doc.id, title:note.title});
+  });
+  Object.keys(folders).forEach(folderName=>{
+    const folderDiv = document.createElement("div");
+    folderDiv.innerHTML = `<strong>${folderName}</strong>`;
+    folders[folderName].forEach(note=>{
+      const noteBtn = document.createElement("div");
+      noteBtn.textContent = note.title;
+      noteBtn.onclick = ()=>loadNote(note.id);
+      folderDiv.appendChild(noteBtn);
+    });
+    folderList.appendChild(folderDiv);
+  });
 }
 
-// OPEN NOTE
-async function openNote(id){
-currentNote=id
-const snap=await getDoc(doc(db,"notes",id))
-const data=snap.data()
-titleInput.value=data.title
-editor.innerHTML=data.content
-newBlock() // Ensure editable
+window.createNewFolder = async()=>{
+  const folderName = prompt("Folder name:");
+  if(!folderName) return;
+  await addDoc(collection(db,"notes"),{
+    title:"UNTITLED", content:"", folder:folderName, access:[currentUser.uid], owner:currentUser.uid
+  });
+  loadFolders();
 }
 
-// BLOCK EDITOR
-function newBlock(text=""){
-const div=document.createElement("div")
-div.className="block"
-div.contentEditable=true
-div.innerText=text
-div.addEventListener("keydown",handleBlockKeys)
-editor.appendChild(div)
-div.focus()
-}
-function handleBlockKeys(e){
-const block=e.target
-if(e.key==="Enter"){ e.preventDefault(); newBlock(); saveNote() }
-if(e.key==="Backspace"&&block.innerText===""){ block.remove(); saveNote() }
-if(block.innerText.startsWith("/")) slashCommand(block)
-markdownParse(block)
-}
-function slashCommand(block){
-const cmd=block.innerText.trim()
-if(cmd==="/h1") block.outerHTML="<h1 class='block' contenteditable>Header</h1>"
-if(cmd==="/h2") block.outerHTML="<h2 class='block' contenteditable>Header</h2>"
-if(cmd==="/quote") block.outerHTML="<blockquote class='block' contenteditable>Quote</blockquote>"
-if(cmd==="/todo") block.outerHTML="<div class='block'><input type='checkbox'> Todo</div>"
-}
-function markdownParse(block){
-let t=block.innerText
-if(t.startsWith("# ")) block.outerHTML="<h1 class='block' contenteditable>"+t.slice(2)+"</h1>"
-if(t.startsWith("## ")) block.outerHTML="<h2 class='block' contenteditable>"+t.slice(3)+"</h2>"
-if(t.startsWith("> ")) block.outerHTML="<blockquote class='block' contenteditable>"+t.slice(2)+"</blockquote>"
-}
-newBlock()
-editor.addEventListener("input",saveNote)
-titleInput.addEventListener("input",saveNote)
-
-// SAVE & XP
-async function saveNote(){
-if(!currentNote) return
-await updateDoc(doc(db,"notes",currentNote),{title:titleInput.value,content:editor.innerHTML})
-const words=editor.innerText.split(/\s+/).filter(Boolean).length
-const userRef=doc(db,"users",user.uid)
-const snap=await getDoc(userRef)
-let data=snap.data()
-let xpGain=words*(1+data.prestige*0.1)
-let newXP=data.xp+xpGain
-let newLevel=data.level
-let threshold=100*newLevel
-if(newXP>=threshold){ newLevel++; newXP-=threshold }
-await updateDoc(userRef,{xp:newXP,level:newLevel})
-loadUserData()
+window.createNewNote = async()=>{
+  await addDoc(collection(db,"notes"),{
+    title:"UNTITLED", content:"", access:[currentUser.uid], owner:currentUser.uid
+  });
+  loadFolders();
 }
 
-// CHAT
+async function loadNote(noteId){
+  const noteSnap = await getDoc(doc(db,"notes",noteId));
+  const noteData = noteSnap.data();
+  document.getElementById("note-title").value = noteData.title;
+  richEditor.innerText = noteData.content||"";
+  currentPage = 0;
+}
+
+// --- Chat ---
 function initChat(){
-onChildAdded(ref(rtdb,"messages"), snap=>{
-const m=snap.val()
-const div=document.createElement("div")
-div.className="chat-msg"
-div.innerText=m.sender+": "+m.text
-chatHistory.appendChild(div)
-chatHistory.scrollTop=chatHistory.scrollHeight
-})
-chatInput.addEventListener("keypress",e=>{
-if(e.key==="Enter"){ push(ref(rtdb,"messages"),{sender:user.email.split("@")[0],text:chatInput.value}); chatInput.value=""}
-})
+  onChildAdded(ref(rtd,'messages'),(snap)=>{
+    const m = snap.val();
+    const div = document.createElement("div");
+    div.className="msg-bubble";
+    div.style.borderColor = m.color||"#151515";
+    div.innerHTML = (m.tag? "["+m.tag+"] ":"")+m.sender+" "+("★".repeat(m.prestige||0))+"<br>"+m.text;
+    chatHistory.appendChild(div);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+  });
+}
+if(chatIn) document.getElementById("chat-send").onclick = ()=>{
+  const t = chatIn.value;
+  if(!t) return;
+  push(ref(rtd,'messages'),{
+    uid:currentUser.uid, sender:currentUser.email.split("@")[0],
+    text:t, prestige:myData.prestige||0, tag:myData.activeTag||"", color:myData.color||"#888"
+  });
+  chatIn.value="";
 }
 
-// STORE
-async function loadStore(){
-const snap=await getDocs(collection(db,"store"))
-storeDiv.innerHTML=""
-snap.forEach(d=>{
-const item=d.data()
-if(item.stock<=0) return
-const div=document.createElement("div")
-div.className="item"
-div.innerHTML=d.id+"<br>"+item.price+" credits"
-storeDiv.appendChild(div)
-})
+// --- Notes Pagination ---
+let PAGE_SIZE=500, currentPage=0;
+window.nextPage=()=>{
+  const words = richEditor.innerText.split(/\s+/)
+  const pages=[]
+  for(let i=0;i<words.length;i+=PAGE_SIZE) pages.push(words.slice(i,i+PAGE_SIZE).join(" "))
+  if(currentPage<pages.length-1) currentPage++
+  richEditor.innerText = pages[currentPage]
+}
+window.prevPage=()=>{
+  currentPage--
+  if(currentPage<0) currentPage=0
+  richEditor.innerText = richEditor.innerText.split(/\s+/).slice(currentPage*PAGE_SIZE,(currentPage+1)*PAGE_SIZE).join(" ")
 }
 
-// LEADERBOARD
-async function loadLeaderboard(){
-const snap=await getDocs(query(collection(db,"users"),orderBy("xp","desc")))
-leaderboardDiv.innerHTML=""
-snap.forEach(d=>{
-const u=d.data()
-const row=document.createElement("div")
-row.innerText=u.email+" "+u.xp+" XP"
-leaderboardDiv.appendChild(row)
-})
+// --- Store ---
+window.buyColor = async (color,price)=>{
+  if((myData.credits||0)<price) return alert("Not enough credits")
+  await updateDoc(doc(db,"users",currentUser.uid),{color:color, credits:(myData.credits||0)-price})
+}
+const TAG_SUPPLY={DEV:1,PRO:10,ELITE:5}
+window.buyTag = async(tag,price)=>{
+  if(TAG_SUPPLY[tag]<=0) return alert("Tag sold out")
+  if((myData.credits||0)<price) return alert("Not enough credits")
+  TAG_SUPPLY[tag]--
+  await updateDoc(doc(db,"users",currentUser.uid),{activeTag:tag, credits:(myData.credits||0)-price})
+}
+window.sellNotePages = async ()=>{
+  const words = richEditor.innerText.split(/\s+/).length
+  const pages = Math.floor(words/500)
+  const credits = pages*25
+  await updateDoc(doc(db,"users",currentUser.uid),{credits:(myData.credits||0)+credits})
+  alert("Sold "+pages+" pages")
 }
 
-// VIEW SWITCH
-function show(v){
-document.getElementById("notesView").classList.add("hidden")
-document.getElementById("chatView").classList.add("hidden")
-document.getElementById("storeView").classList.add("hidden")
-document.getElementById("leaderboardView").classList.add("hidden")
-if(v=="notes") document.getElementById("notesView").classList.remove("hidden")
-if(v=="chat") document.getElementById("chatView").classList.remove("hidden")
-if(v=="store") document.getElementById("storeView").classList.remove("hidden")
-if(v=="leaderboard") document.getElementById("leaderboardView").classList.remove("hidden")
+// --- Leaderboard ---
+window.renderLeaderboard = async ()=>{
+  window.showView("leaderboard-view")
+  const snap = await getDocs(query(collection(db,"users"),orderBy("wordCount","desc")))
+  leaderboardList.innerHTML=""
+  snap.forEach(d=>{
+    const u = d.data()
+    const row = document.createElement("div")
+    row.innerText = u.email.split("@")[0]+" "+("★".repeat(u.prestige||0))+" "+u.wordCount
+    leaderboardList.appendChild(row)
+  })
+}
+
+// --- Summarize ---
+window.summarizeNote = ()=>{
+  const text = richEditor.innerText
+  const sentences = text.split(/[.!?]/)
+  alert(sentences.slice(0,3).join(".")+".")
+}
+
+// --- Switch views ---
+window.showView=(id)=>{
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
+  document.getElementById(id).classList.add("active")
 }
 </script>
+
 </body>
 </html>
