@@ -354,6 +354,22 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+  onAuthStateChanged(auth, async (user) => {
+  if(user){
+    currentUser = user;
+    document.getElementById("auth-overlay").style.display = "none";
+    
+    onSnapshot(doc(db,"users",user.uid),(snap)=>{
+      myData = snap.data()||{};
+      updateUserUI();
+      updateStatsUI();
+    });
+
+    loadFolders();
+    initChat();
+    storeItems(); // <-- call this to load market
+  }
+});
 document.getElementById("login-btn").onclick = async ()=>{
   const e=document.getElementById("email").value
   const p=document.getElementById("pass").value
@@ -549,14 +565,18 @@ window.prevPage=()=>{
 async function storeItems(){
   const snap = await getDocs(collection(db,"store"));
   const storeGrid = document.querySelector(".store-grid");
-  storeGrid.innerHTML = "";
+  storeGrid.innerHTML = ""; // clear old cards
 
   snap.forEach(doc => {
     const item = doc.data();
+
+    // Skip items with stock 0
+    if(item.stock === 0) return;
+
     const card = document.createElement("div");
     card.className = "store-card";
     card.innerHTML = `<strong>${item.name}</strong><span>${item.price} 💰</span>`;
-    
+
     card.onclick = async () => {
       if(item.type === "color") await buyColor(doc.id);
       if(item.type === "tag") await buyTag(doc.id);
@@ -566,17 +586,17 @@ async function storeItems(){
     storeGrid.appendChild(card);
   });
 
-  // Auto-update when store changes
+  // Live update when store changes
   onSnapshot(collection(db,"store"),()=>storeItems());
 }
 // Buy a color
-window.buyColor = async (itemId)=>{
+async function buyColor(itemId){
   const itemRef = doc(db,"store",itemId);
   const itemSnap = await getDoc(itemRef);
   const item = itemSnap.data();
 
   if((myData.credits||0) < item.price) return alert("Not enough credits");
-  
+
   await updateDoc(doc(db,"users",currentUser.uid),{
     color: item.value,
     credits: (myData.credits||0) - item.price
@@ -585,8 +605,7 @@ window.buyColor = async (itemId)=>{
   alert(`Purchased ${item.name}!`);
 }
 
-// Buy a tag
-window.buyTag = async (itemId)=>{
+async function buyTag(itemId){
   const itemRef = doc(db,"store",itemId);
   const itemSnap = await getDoc(itemRef);
   const item = itemSnap.data();
@@ -594,6 +613,14 @@ window.buyTag = async (itemId)=>{
   if(item.stock <= 0) return alert("Item sold out");
   if((myData.credits||0) < item.price) return alert("Not enough credits");
 
+  await updateDoc(itemRef, { stock: item.stock - 1 });
+  await updateDoc(doc(db,"users",currentUser.uid),{
+    activeTag: item.value,
+    credits: (myData.credits||0) - item.price
+  });
+
+  alert(`Purchased ${item.name}!`);
+}
   // Deduct stock
   await updateDoc(itemRef, { stock: item.stock - 1 });
 
