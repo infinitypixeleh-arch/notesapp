@@ -48,7 +48,7 @@ Credits: <span id="credits">0</span>
 
 <hr>
 <button id="newFolderBtn">+ New Folder</button>
-<div id="folders"></div>
+<div id=""></div>
 <button id="prestigeBtn">Prestige</button>
 </aside>
 
@@ -93,7 +93,7 @@ let currentFolder=null
 // Elements
 const editor=document.getElementById("editor")
 const titleInput=document.getElementById("title")
-const foldersDiv=document.getElementById("folders")
+const foldersDiv=document.getElementById("folder")
 const chatInput=document.getElementById("chatInput")
 const chatHistory=document.getElementById("chatHistory")
 const storeDiv=document.getElementById("store")
@@ -148,7 +148,7 @@ leaderboardBtn.addEventListener("click",()=>show("leaderboard"))
 newFolderBtn.addEventListener("click", async ()=>{
 const name=prompt("Folder Name")
 if(!name) return
-await addDoc(collection(db,"folders"),{owner:user.uid,name:name})
+await addDoc(collection(db,"folder"),{owner:user.uid,name:name})
 })
 
 // PRESTIGE
@@ -164,7 +164,7 @@ loadUserData()
 
 // FOLDERS
 async function loadFolders(){
-const q=query(collection(db,"folders"),where("owner","==",user.uid))
+const q=query(collection(db,"folder"),where("owner","==",user.uid))
 onSnapshot(q,snap=>{
 foldersDiv.innerHTML=""
 snap.forEach(f=>{
